@@ -26,6 +26,8 @@ function add() {
     <h1 class="text-2xl">{{ data3.age }}</h1>
     <h1 class="text-2xl">{{ data4.age }}</h1>
     <h1 class="text-2xl">{{ data5 }}</h1>
+    <h1 class="text-2xl">{{ data5 }}</h1>
+    <h1 class="text-2xl">{{ data5 }}</h1>
     <button class="btn" @click="add" >click</button>
     <button class="btn bg-primary">click2</button>
   </div>
