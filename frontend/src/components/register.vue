@@ -9,6 +9,11 @@ const subtitle = "You need to use your email to register";
 const buttonText = "Register"
 
 const email = ref("")
+const isVisible = ref(false); // 初始状态，密码不可见
+
+const handleVisibilityChange = (newValue) => {
+  isVisible.value = newValue;
+};
 
 function registerIn(username, password) {
   console.log(username.value);
@@ -21,7 +26,7 @@ function registerIn(username, password) {
 <template>
   <loginRigForForm
       :form-type="formType"
-      :title="title" :subtitle="subtitle" :button-text="buttonText"
+      :title="title" :subtitle="subtitle" :button-text="buttonText" :is-visible="isVisible"
       @getInfo="registerIn">
     <label class="form-control w-full input-container relative">
       <div class="label">
@@ -44,7 +49,7 @@ function registerIn(username, password) {
             class="input input-bordered input-info w-full grow pl-10" v-model="email"/>
       </div>
     </label>
-    <show-password></show-password>
+    <show-password @update:visible="handleVisibilityChange"></show-password>
   </loginRigForForm>
 </template>
 

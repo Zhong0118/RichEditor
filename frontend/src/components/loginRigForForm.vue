@@ -8,6 +8,7 @@ const props = defineProps({
   title: String,
   subtitle: String,
   buttonText: String,
+  isVisible: Boolean
 })
 
 const emit = defineEmits(['getInfo']);
@@ -60,7 +61,7 @@ const returnInfo = () => {
                 clip-rule="evenodd"/>
           </svg>
           <input
-              type="password"
+              :type="isVisible ? 'text' : 'password'"
               placeholder="Password"
               class="input input-bordered input-info w-full pl-10" v-model="password"/>
         </div>
@@ -69,7 +70,7 @@ const returnInfo = () => {
 
       <slot/>
       <button class="btn btn-primary mt-6 font-bold playfair-display btn-wide" style="font-size: 20px"
-      @click.prevent="returnInfo()">{{ buttonText }}
+              @click.prevent="returnInfo()">{{ buttonText }}
       </button>
     </div>
 
@@ -79,7 +80,7 @@ const returnInfo = () => {
 <style scoped>
 .wholeForm {
   width: 70%;
-  top: 20%;
+  top: 18%;
   position: absolute;
 
 }

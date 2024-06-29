@@ -6,6 +6,10 @@ import showPassword from "@/components/showPassword.vue"
 const username = ref("");
 const password = ref("");
 const email = ref('')
+const isVisible = ref(false)
+const handleVisibilityChange = (newValue) => {
+  isVisible.value = newValue;
+};
 const title = "Forget-pwd";
 const subtitle = "Type your username and email to reset your password";
 const buttonText = "Confirm"
@@ -76,23 +80,22 @@ const buttonText = "Confirm"
                 clip-rule="evenodd"/>
           </svg>
           <input
-              type="password"
+              :type="isVisible ? 'text' : 'password'"
               placeholder="Password"
               class="input input-bordered input-info w-full pl-10" v-model="password"/>
         </div>
       </label>
-      <show-password></show-password>
+      <show-password @update:visible="handleVisibilityChange"></show-password>
       <button class="btn btn-primary mt-6 font-bold playfair-display btn-wide" style="font-size: 20px">{{ buttonText }}
       </button>
     </div>
-
   </div>
 </template>
 
 <style scoped>
 .wholeForm {
   width: 70%;
-  top: 20%;
+  top: 18%;
   position: absolute;
 
 }

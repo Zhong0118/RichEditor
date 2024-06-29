@@ -9,6 +9,12 @@ const title = "Hello";
 const subtitle = "Type your username and password";
 const buttonText = "Login"
 
+const isVisible = ref(false); // 初始状态，密码不可见
+
+const handleVisibilityChange = (newValue) => {
+  isVisible.value = newValue;
+};
+
 const emit = defineEmits(['toForgetForm']);
 const onForgetPasswordClick = () => {
   emit('toForgetForm', 'forget-pwd');
@@ -23,8 +29,9 @@ function loginIn(username, password) {
   <loginRigForForm
       :form-type="formType"
       :title="title" :subtitle="subtitle" :button-text="buttonText"
+      :is-visible="isVisible"
       @getInfo="loginIn">
-    <show-password>
+    <show-password @update:visible="handleVisibilityChange">
       <span class="forget-pwd-btn cursor-pointer" style="color: var(--login1);"
             @click="onForgetPasswordClick">forget password</span>
     </show-password>

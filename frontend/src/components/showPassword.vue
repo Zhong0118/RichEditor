@@ -1,12 +1,19 @@
 <script setup>
+import {ref, watch} from "vue";
 
+const isVisible = ref(false)
+const emit = defineEmits(['update:visible'])
+watch(isVisible, (newValue) => {
+  emit('update:visible', newValue)
+})
 </script>
 
 <template>
   <div class="other-select flex justify-between mt-2">
     <div class="rem-pwd">
-      <input type="checkbox" id="check">
-      <label for="check" class="rem-pwd-tips cursor-pointer">show password</label>
+      <input type="checkbox" id="check" v-model="isVisible">
+      <label for="check" class="rem-pwd-tips cursor-pointer">
+        {{isVisible ? 'Hide' : 'Show'}} password</label>
     </div>
     <slot></slot>
   </div>
