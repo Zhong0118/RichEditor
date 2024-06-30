@@ -5,6 +5,11 @@
 @tailwind utilities;
 
 :root {
+    --sb-track-color: #b9c0c3;
+    --sb-thumb-color: #06668e;
+    --sb-size: 5px;
+
+
     --login: rgb(22, 30, 49);
     --login-b: rgb(45, 50, 80);
     --login1: rgb(100, 108, 154);
@@ -350,24 +355,26 @@
     scroll-behavior: smooth;
 }
 
-*::-webkit-scrollbar-thumb {
-    border-radius: 10px; /* 滚动条滑块圆角 */
-    box-shadow: inset 0 0 5px rgba(215, 198, 198, 0.422); /* 滚动条滑块阴影效果 */
-}
-
 *::-webkit-scrollbar {
-    width: 6px; /* 滚动条宽度 */
-    height: 6px; /* 滚动条高度 */
+    width: var(--sb-size)
 }
 
 *::-webkit-scrollbar-thumb {
-    background-color: #918b8b; /* 滚动条滑块颜色 */
+    border-radius: 8px; /* 滚动条滑块圆角 */
+    box-shadow: inset 0 0 5px rgba(215, 198, 198, 0.422); /* 滚动条滑块阴影效果 */
+    background-color: var(--sb-thumb-color); /* 滚动条滑块颜色 */
 }
 
 *::-webkit-scrollbar-track {
-    background-color: #f1f1f1; /* 滚动条背景颜色 */
+    background: var(--sb-track-color);
+    border-radius: 8px;
 }
 
+@supports not selector(::-webkit-scrollbar) {
+    * {
+        scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
+    }
+}
 
 /*字体相关*/
 .playwrite-it-moderna {
