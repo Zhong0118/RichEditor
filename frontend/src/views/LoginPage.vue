@@ -1,65 +1,71 @@
 <script setup>
-import {ref, reactive, onMounted, computed, markRaw} from "vue";
+import { markRaw, ref } from "vue";
 
-import Login from "@/components/login.vue";
-import Register from "@/components/register.vue";
-import Forget from "@/components/forget.vue";
+import Login from "@/components/login/login.vue";
+import Register from "@/components/login/register.vue";
+import Forget from "@/components/login/forget.vue";
 
-const tabs = ref([
-  markRaw(Login),
-  markRaw(Register),
-  markRaw(Forget),
-])
+const tabs = ref([markRaw(Login), markRaw(Register), markRaw(Forget)]);
 const currentFormType = ref(tabs.value[0]);
 const currentNum = ref(0);
 
 function switchForm(formType) {
-  if (formType === 'login') {
+  if (formType === "login") {
     currentFormType.value = tabs.value[0];
     currentNum.value = 0;
-  } else if (formType === 'register') {
+  } else if (formType === "register") {
     currentFormType.value = tabs.value[1];
     currentNum.value = 1;
   } else {
     currentFormType.value = tabs.value[2];
     currentNum.value = 2;
-    console.log("父组件响应")
+    console.log("父组件响应");
   }
 }
 
-const findUrl = '@/assets/images/finding.svg'
-const imageUrl = 'https://picsum.photos/800'
+const findUrl = "@/assets/images/finding.svg";
+const imageUrl = "https://picsum.photos/800";
 </script>
 
 <template>
-  <div class="wrapper relative box-border" style="background: var(--login); width: 100dvw; height: 100dvh">
+  <!--  class="relative box-border h-[100vh] w-[100vw] bg-[var(--login)]"-->
+  <div data-theme="emerald" class="h-[100vh] w-[100vw] bg-[var(--login)]">
     <div class="box">
-      <div class="forms relative w-1/2 h-full flex flex-col items-center box-border">
+      <div
+        class="forms relative box-border flex h-full w-1/2 flex-col items-center"
+      >
         <div class="tips box-border">
-          <span class="login-btn mr-5"
-                :class="{'active-choose': currentNum === 0}"
-                @click="switchForm('login')">login</span>
-          <span class="register-btn"
-                :class="{'active-choose': currentNum === 1}"
-                @click="switchForm('register')">register</span>
+          <span
+            :class="{ 'active-choose': currentNum === 0 }"
+            class="login-btn mr-5"
+            @click="switchForm('login')"
+            >login</span
+          >
+          <span
+            :class="{ 'active-choose': currentNum === 1 }"
+            class="register-btn"
+            @click="switchForm('register')"
+            >register</span
+          >
         </div>
-        <transition name="into" mode="out-in">
+        <transition mode="out-in" name="into">
           <KeepAlive>
-            <component :is="currentFormType" @toForgetForm="switchForm"></component>
+            <component
+              :is="currentFormType"
+              @toForgetForm="switchForm"
+            ></component>
           </KeepAlive>
         </transition>
-
       </div>
     </div>
   </div>
-
 </template>
 
 <style>
 .box {
   width: 80vw;
   height: 80vh;
-  background: url('https://picsum.photos/800') no-repeat fixed right top;
+  background: url("https://picsum.photos/800") no-repeat fixed right top;
   background-size: 50% 100%;
   position: absolute;
   left: 50%;
@@ -134,6 +140,4 @@ const imageUrl = 'https://picsum.photos/800'
 .into-enter-active {
   animation: into 0.5s ease-in-out forwards;
 }
-
-
 </style>

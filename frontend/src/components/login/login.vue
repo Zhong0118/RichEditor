@@ -1,7 +1,7 @@
 <script setup>
-import {ref, reactive, defineProps, defineEmits, computed} from "vue";
-import loginRigForForm from "@/components/loginRigForForm.vue";
-import showPassword from "@/components/showPassword.vue"
+import {defineEmits, ref} from "vue";
+import loginRigForForm from "@/components/login/loginRigForForm.vue";
+import showPassword from "@/components/login/showPassword.vue"
 
 
 const formType = "login"
@@ -27,15 +27,14 @@ function loginIn(username, password) {
 </script>
 <template>
   <loginRigForForm
-      :form-type="formType"
-      :title="title" :subtitle="subtitle" :button-text="buttonText"
-      :is-visible="isVisible"
+      :button-text="buttonText"
+      :form-type="formType" :is-visible="isVisible" :subtitle="subtitle"
+      :title="title"
       @getInfo="loginIn">
     <show-password @update:visible="handleVisibilityChange">
-      <span class="forget-pwd-btn cursor-pointer" style="color: var(--login1);"
+      <span class="forget-pwd-btn cursor-pointer"
             @click="onForgetPasswordClick">forget password</span>
     </show-password>
-
   </loginRigForForm>
 </template>
 

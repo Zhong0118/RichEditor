@@ -1,25 +1,22 @@
 <script setup>
 import {ref, reactive, defineProps, defineEmits, computed} from "vue";
+import showPassword from "@/components/login/showPassword.vue"
+
 
 const username = ref("");
 const password = ref("");
-const props = defineProps({
-  formType: String,
-  title: String,
-  subtitle: String,
-  buttonText: String,
-  isVisible: Boolean
-})
-
-const emit = defineEmits(['getInfo']);
-const returnInfo = () => {
-  emit('getInfo', username, password);
+const email = ref('')
+const isVisible = ref(false)
+const handleVisibilityChange = (newValue) => {
+  isVisible.value = newValue;
 };
-
+const title = "Forget-pwd";
+const subtitle = "Type your username and email to reset your password";
+const buttonText = "Confirm"
 </script>
 
 <template>
-  <div :class="{formType}" class="wholeForm">
+  <div class="wholeForm">
     <div class="form-title">
       <h1 class="mb-2.5 font-bold text-5xl">{{ title }}</h1>
       <h4>{{ subtitle }}</h4>
@@ -46,7 +43,29 @@ const returnInfo = () => {
       </label>
       <label class="form-control w-full input-container relative">
         <div class="label">
-          <span class="label-text text-xl" style="color: var(--login4);">Password</span>
+          <span class="label-text text-xl" style="color: var(--login4);">Email</span>
+        </div>
+        <div>
+          <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              class="h-5 w-5 opacity-70 absolute top-1/2 left-2.5 translate-y-1/2">
+            <path
+                d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z"/>
+            <path
+                d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z"/>
+          </svg>
+          <input
+              type="email"
+              placeholder="Email"
+              class="input input-bordered input-info w-full grow pl-10" v-model="email"/>
+        </div>
+
+      </label>
+      <label class="form-control w-full input-container relative">
+        <div class="label">
+          <span class="label-text text-xl" style="color: var(--login4);">New Password</span>
         </div>
         <div>
           <svg
@@ -65,15 +84,11 @@ const returnInfo = () => {
               placeholder="Password"
               class="input input-bordered input-info w-full pl-10" v-model="password"/>
         </div>
-
       </label>
-
-      <slot/>
-      <button class="btn btn-primary mt-6 font-bold playfair-display btn-wide" style="font-size: 20px"
-              @click.prevent="returnInfo()">{{ buttonText }}
+      <show-password @update:visible="handleVisibilityChange"></show-password>
+      <button class="btn btn-primary mt-6 font-bold playfair-display btn-wide" style="font-size: 20px">{{ buttonText }}
       </button>
     </div>
-
   </div>
 </template>
 

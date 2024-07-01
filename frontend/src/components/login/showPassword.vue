@@ -1,19 +1,20 @@
 <script setup>
-import {ref, watch} from "vue";
+import { ref, watch } from "vue";
 
-const isVisible = ref(false)
-const emit = defineEmits(['update:visible'])
+const isVisible = ref(false);
+const emit = defineEmits(["update:visible"]);
 watch(isVisible, (newValue) => {
-  emit('update:visible', newValue)
-})
+  emit("update:visible", newValue);
+});
 </script>
 
 <template>
-  <div class="other-select flex justify-between mt-2">
+  <div class="other-select mt-2 flex justify-between">
     <div class="rem-pwd">
-      <input type="checkbox" id="check" v-model="isVisible">
-      <label for="check" class="rem-pwd-tips cursor-pointer">
-        {{isVisible ? 'Hide' : 'Show'}} password</label>
+      <input id="check" v-model="isVisible" type="checkbox" />
+      <label class="rem-pwd-tips cursor-pointer" for="check">
+        {{ isVisible ? "Hide" : "Show" }} password</label
+      >
     </div>
     <slot></slot>
   </div>
@@ -28,7 +29,7 @@ watch(isVisible, (newValue) => {
   color: var(--title-icon-color);
 }
 
-.other-select input[type=checkbox] {
+.other-select input[type="checkbox"] {
   width: 20px;
   height: 20px;
   margin-right: 10px;
@@ -36,7 +37,7 @@ watch(isVisible, (newValue) => {
   border: 0;
 }
 
-.other-select input[type=checkbox]::after {
+.other-select input[type="checkbox"]::after {
   position: absolute;
   top: 0;
   color: #000;
@@ -50,7 +51,7 @@ watch(isVisible, (newValue) => {
   content: " ";
 }
 
-.other-select input[type=checkbox]:checked::after {
+.other-select input[type="checkbox"]:checked::after {
   content: "√";
   color: var(--login3);
   font-size: 30px;
