@@ -7,6 +7,9 @@ import { createPinia } from "pinia";
 import router from "./router";
 
 import { createVuestic } from "vuestic-ui";
+import svgIcon from "@/ui/svg-icon.vue";  // 作为通用组件直接用
+import "@/assets/icons/svg-icon.js";
+import "virtual:svg-icons-register";
 import "vuestic-ui/styles/essential.css";
 import "vuestic-ui/styles/typography.css";
 import "material-design-icons-iconfont/dist/material-design-icons.min.css";
@@ -15,6 +18,7 @@ const app = createApp(App);
 
 app.use(createPinia());
 app.use(router);
+app.component("svg-icon", svgIcon);
 app
   .use(
     createVuestic({

@@ -5,9 +5,9 @@ import showPassword from "@/components/login/showPassword.vue"
 
 
 const formType = "login"
-const title = "Hello";
-const subtitle = "Type your username and password";
-const buttonText = "Login"
+const title = "你好";
+const subtitle = "请输入你的用户名和密码";
+const buttonText = "登录"
 
 const isVisible = ref(false); // 初始状态，密码不可见
 

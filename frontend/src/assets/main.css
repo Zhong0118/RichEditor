@@ -1,7 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Exo+2&family=Ma+Shan+Zheng&family=Montserrat&family=Noto+Serif+SC&family=Permanent+Marker&family=Playfair+Display&family=Playwrite+DE+Grund&family=Playwrite+ES+Deco&family=Playwrite+IT+Moderna&family=Shadows+Into+Light&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=ZCOOL+XiaoWei&display=swap');
-@import "https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;1,700&display=swap";
-@import "https://fonts.googleapis.com/icon?family=Material+Icons";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -443,4 +439,58 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: AlimamaDaoLiTi;
+    src: url('@/assets/fonts/AlimamaDaoLiTi.ttf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: AlimamaDongFangDaKai;
+    src: url('@/assets/fonts/AlimamaDongFangDaKai-Regular.ttf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: MiSans;
+    src: url('@/assets/fonts/MiSans-Normal.ttf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: OPPOSans;
+    src: url('@/assets/fonts/OPPOSans-Regular.ttf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: SanJiBangKaiJianTi-2;
+    src: url('@/assets/fonts/SanJiBangKaiJianTi-2.ttf');
+    font-display: swap;
+}
+
+.alidaoli {
+    font-family: AlimamaDaoLiTi, sans-serif;
+    font-style: normal;
+}
+
+.alidongfang {
+    font-family: AlimamaDongFangDaKai, sans-serif;
+    font-style: normal;
+}
+
+.misans {
+    font-family: MiSans, sans-serif;
+    font-style: normal;
+}
+
+.opposans {
+    font-family: OPPOSans, sans-serif;
+    font-style: normal;
+}
+
+.sanjibangkaijian {
+    font-family: SanJiBangKaiJianTi-2, sans-serif;
+    font-style: normal;
+}
 

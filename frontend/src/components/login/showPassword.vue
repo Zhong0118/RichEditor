@@ -12,8 +12,8 @@ watch(isVisible, (newValue) => {
   <div class="other-select mt-2 flex justify-between">
     <div class="rem-pwd">
       <input id="check" v-model="isVisible" type="checkbox" />
-      <label class="rem-pwd-tips cursor-pointer" for="check">
-        {{ isVisible ? "Hide" : "Show" }} password</label
+      <label class="misans rem-pwd-tips cursor-pointer" for="check">
+        {{ isVisible ? "隐藏" : "展示" }}密码</label
       >
     </div>
     <slot></slot>

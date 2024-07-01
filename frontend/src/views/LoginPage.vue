@@ -19,7 +19,6 @@ function switchForm(formType) {
   } else {
     currentFormType.value = tabs.value[2];
     currentNum.value = 2;
-    console.log("父组件响应");
   }
 }
 
@@ -29,7 +28,7 @@ const imageUrl = "https://picsum.photos/800";
 
 <template>
   <!--  class="relative box-border h-[100vh] w-[100vw] bg-[var(--login)]"-->
-  <div data-theme="emerald" class="h-[100vh] w-[100vw] bg-[var(--login)]">
+  <div class="h-[100vh] w-[100vw] bg-[var(--login)]" data-theme="emerald">
     <div class="box">
       <div
         class="forms relative box-border flex h-full w-1/2 flex-col items-center"
@@ -37,15 +36,15 @@ const imageUrl = "https://picsum.photos/800";
         <div class="tips box-border">
           <span
             :class="{ 'active-choose': currentNum === 0 }"
-            class="login-btn mr-5"
+            class="alidongfang login-btn mr-5"
             @click="switchForm('login')"
-            >login</span
+            >登录</span
           >
           <span
             :class="{ 'active-choose': currentNum === 1 }"
-            class="register-btn"
+            class="alidongfang register-btn"
             @click="switchForm('register')"
-            >register</span
+            >注册</span
           >
         </div>
         <transition mode="out-in" name="into">
