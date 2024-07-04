@@ -4,6 +4,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 
 import { createPinia } from "pinia";
+import piniaPluginPersist from 'pinia-plugin-persistedstate'
 import router from "./router";
 
 import { createVuestic } from "vuestic-ui";
@@ -15,8 +16,10 @@ import "vuestic-ui/styles/typography.css";
 import "material-design-icons-iconfont/dist/material-design-icons.min.css";
 
 const app = createApp(App);
+const pinia = createPinia();
+pinia.use(piniaPluginPersist)
 
-app.use(createPinia());
+app.use(pinia);
 app.use(router);
 app.component("svg-icon", svgIcon);
 app.use(
