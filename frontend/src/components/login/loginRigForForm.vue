@@ -12,9 +12,9 @@ const props = defineProps({
   isVisible: Boolean,
 });
 
-const emit = defineEmits(["getInfo"]);
+const emit = defineEmits(["get-info"]);
 const returnInfo = () => {
-  emit("getInfo", username, password);
+  emit("get-info", username, password);
 };
 </script>
 

@@ -30,7 +30,7 @@ function registerIn(username, password) {
     :is-visible="isVisible"
     :subtitle="subtitle"
     :title="title"
-    @getInfo="registerIn"
+    @get-info="registerIn"
   >
     <label class="input-container form-control relative w-full">
       <div class="label">
@@ -38,9 +38,9 @@ function registerIn(username, password) {
       </div>
       <div>
         <SvgIcon
-            class="absolute left-2.5 top-1/2 translate-y-1/2 text-[20px] opacity-70"
-            name="email"
-          ></SvgIcon>
+          class="absolute left-2.5 top-1/2 translate-y-1/2 text-[20px] opacity-70"
+          name="email"
+        ></SvgIcon>
         <input
           v-model="email"
           class="input w-full grow pl-10"

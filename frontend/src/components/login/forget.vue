@@ -18,8 +18,8 @@ const buttonText = "确认";
 <template>
   <div class="wholeForm">
     <div class="form-title">
-      <h1 class="mb-2.5 text-5xl font-bold">{{ title }}</h1>
-      <h4>{{ subtitle }}</h4>
+      <h1 class="alidaoli mb-2.5 text-5xl font-bold">{{ title }}</h1>
+      <h4 class="alidaoli">{{ subtitle }}</h4>
     </div>
     <!--    absolute left-2.5 top-1/2 h-5 w-5 translate-y-1/2 opacity-70-->
     <div class="form mt-4">
