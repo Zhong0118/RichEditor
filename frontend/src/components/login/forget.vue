@@ -2,6 +2,9 @@
 import { ref } from "vue";
 import showPassword from "@/components/login/showPassword.vue";
 import SvgIcon from "@/ui/svg-icon.vue";
+import { useUserStore } from "@/store/user";
+import { useAuth } from "@/hooks/useAuth";
+import Swal from "sweetalert2";
 
 const username = ref("");
 const password = ref("");
@@ -13,6 +16,29 @@ const handleVisibilityChange = (newValue) => {
 const title = "忘记密码";
 const subtitle = "输入对应的用户名和邮箱进行密码重置";
 const buttonText = "确认";
+
+const userStore = useUserStore();
+const { requestAuth, checkWhole } = useAuth();
+
+function resetPassword(username, password, email) {
+  const info = { a: username, b: password, c: email };
+  if (checkWhole(info)) {
+    const config = {
+      method: "POST",
+      url: "/api/forget",
+      data: { username, password, email },
+    };
+    requestAuth(config, "重置成功", "重置失败");
+  } else {
+    Swal.fire({
+      title: "请填写所有输入项",
+      icon: "error",
+      confirmButtonText: "关闭",
+      timer: 5000,
+      timerProgressBar: true,
+    });
+  }
+}
 </script>
 
 <template>
@@ -84,6 +110,7 @@ const buttonText = "确认";
       <button
         class="alidongfang btn btn-primary btn-wide mt-6 font-bold"
         style="font-size: 20px"
+        @click="resetPassword(username, password, email)"
       >
         {{ buttonText }}
       </button>

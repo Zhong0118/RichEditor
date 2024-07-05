@@ -3,6 +3,8 @@ import { ref } from "vue";
 import loginRigForForm from "@/components/login/loginRigForForm.vue";
 import showPassword from "@/components/login/showPassword.vue";
 import SvgIcon from "@/ui/svg-icon.vue";
+import { useAuth } from "@/hooks/useAuth";
+import Swal from "sweetalert2";
 
 const formType = "register";
 const title = "欢迎";
@@ -15,11 +17,27 @@ const isVisible = ref(false); // 初始状态，密码不可见
 const handleVisibilityChange = (newValue) => {
   isVisible.value = newValue;
 };
+const { requestAuth, checkWhole } = useAuth();
 
 function registerIn(username, password) {
-  console.log(username.value);
-  console.log(password.value);
-  console.log(email.value);
+  const e = email.value;
+  const info = { a: username, b: password, c: e };
+  if (checkWhole(info)) {
+    const config = {
+      method: "POST",
+      url: "/api/register",
+      data: { username, password, e },
+    };
+    requestAuth(config, "注册成功", "注册失败");
+  } else {
+    Swal.fire({
+      title: "请填写所有输入项",
+      icon: "error",
+      confirmButtonText: "关闭",
+      timer: 5000,
+      timerProgressBar: true,
+    });
+  }
 }
 </script>
 

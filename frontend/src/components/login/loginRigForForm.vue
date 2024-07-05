@@ -14,7 +14,7 @@ const props = defineProps({
 
 const emit = defineEmits(["get-info"]);
 const returnInfo = () => {
-  emit("get-info", username, password);
+  emit("get-info", username.value, password.value);
 };
 </script>
 

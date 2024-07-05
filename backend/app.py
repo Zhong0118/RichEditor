@@ -1,30 +1,38 @@
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
-from pymongo import MongoClient
+
+from auth import *
+from backend.models import _hash_password
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
-client = MongoClient('mongodb://localhost:27017/')
-db = client['richEditorDB']
-user_collection = db['User']
-document_collection = db['Document']
-template_collection = db['Template']
-media_collection = db['Media']
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    return 'Hello World!'
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    password = _hash_password(password)
+    return login_verify(username, password)
 
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    return 'Hello World!'
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    email = data.get('e')
+    return register_verify(username, password, email)
 
 
 @app.route('/api/forget', methods=['POST'])
 def forget():
-    return 'Hello World!'
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    email = data.get('email')
+    return forget_verify(username, password, email)
 
 
 if __name__ == '__main__':

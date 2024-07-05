@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 type User = {
-  id: number;
+  uid: string;
   username: string;
-  password: string;
 };
 export const useUserStore = defineStore(
   "user",

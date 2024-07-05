@@ -10,7 +10,7 @@ class User:
     def __init__(self, uid, username, email, password, is_paid=False, duration=0, start_date=None):
         self.uid = uid  # 用户ID
         self.username = username  # 用户名
-        self.password = _hash_password(password)  # 密码
+        self.password = password  # 密码
         self.email = email  # 邮箱
         self.is_paid = is_paid  # 是否已支付
         self.duration = duration  # 付费持续天数

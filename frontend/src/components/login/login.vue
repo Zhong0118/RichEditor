@@ -2,6 +2,8 @@
 import { defineEmits, ref } from "vue";
 import loginRigForForm from "@/components/login/loginRigForForm.vue";
 import showPassword from "@/components/login/showPassword.vue";
+import { useAuth } from "@/hooks/useAuth";
+import Swal from "sweetalert2";
 
 const formType = "login";
 const title = "你好";
@@ -19,9 +21,26 @@ const onForgetPasswordClick = () => {
   emit("toForgetForm", "forget-pwd");
 };
 
+const { requestAuth, checkWhole } = useAuth();
+
 function loginIn(username, password) {
-  console.log(username.value);
-  console.log(password.value);
+  const info = { a: username, b: password };
+  if (checkWhole(info)) {
+    const config = {
+      method: "POST",
+      url: "/api/login",
+      data: { username, password },
+    };
+    requestAuth(config, "登陆成功", "登录失败");
+  } else {
+    Swal.fire({
+      title: "请填写所有输入项",
+      icon: "error",
+      confirmButtonText: "关闭",
+      timer: 5000,
+      timerProgressBar: true,
+    });
+  }
 }
 </script>
 <template>
