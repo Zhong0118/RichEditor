@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from "vue";
 import showPassword from "@/components/login/showPassword.vue";
-import SvgIcon from "@/ui/svg-icon.vue";
 import { useUserStore } from "@/store/user";
 import { useAuth } from "@/hooks/useAuth";
 import Swal from "sweetalert2";
@@ -56,10 +55,9 @@ function resetPassword(username, password, email) {
           >
         </div>
         <div>
-          <SvgIcon
-            class="absolute left-2.5 top-1/2 translate-y-1/2 text-[20px] opacity-70"
-            name="username"
-          ></SvgIcon>
+          <i
+            class="pi pi-user absolute left-2.5 top-1/2 translate-y-[80%] text-[20px] opacity-70"
+          ></i>
           <input
             v-model="username"
             class="input w-full pl-10"
@@ -75,10 +73,9 @@ function resetPassword(username, password, email) {
           >
         </div>
         <div>
-          <SvgIcon
-            class="absolute left-2.5 top-1/2 translate-y-1/2 text-[20px] opacity-70"
-            name="email"
-          ></SvgIcon>
+          <i
+            class="pi pi-envelope absolute left-2.5 top-1/2 translate-y-[80%] text-[20px] opacity-70"
+          ></i>
           <input
             v-model="email"
             class="input w-full grow pl-10"
@@ -94,10 +91,9 @@ function resetPassword(username, password, email) {
           >
         </div>
         <div>
-          <SvgIcon
-            class="absolute left-2.5 top-1/2 translate-y-1/2 text-[20px] opacity-70"
-            name="password"
-          ></SvgIcon>
+          <i
+            class="pi pi-key absolute left-2.5 top-1/2 translate-y-[80%] text-[20px] opacity-70"
+          ></i>
           <input
             v-model="password"
             :type="isVisible ? 'text' : 'password'"

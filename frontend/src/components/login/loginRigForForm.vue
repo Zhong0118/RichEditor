@@ -30,10 +30,7 @@ const returnInfo = () => {
           <span class="label-text text-xl text-[--login4]">用户名</span>
         </div>
         <div>
-          <SvgIcon
-            class="absolute left-2.5 top-1/2 translate-y-1/2 text-[20px] opacity-70"
-            name="username"
-          ></SvgIcon>
+          <i class="pi pi-user absolute left-2.5 top-1/2 translate-y-[80%] text-[20px] opacity-70"></i>
           <input
             v-model="username"
             class="input w-full pl-10"
@@ -47,10 +44,7 @@ const returnInfo = () => {
           <span class="label-text text-xl text-[--login4]">密码</span>
         </div>
         <div>
-          <SvgIcon
-            class="absolute left-2.5 top-1/2 translate-y-1/2 text-[20px] opacity-70"
-            name="password"
-          ></SvgIcon>
+          <i class="pi pi-key absolute left-2.5 top-1/2 translate-y-[80%] text-[20px] opacity-70"></i>
           <input
             v-model="password"
             :type="isVisible ? 'text' : 'password'"

@@ -62,8 +62,8 @@ const imageUrl = "https://picsum.photos/800";
 
 <style>
 .box {
-  width: 80vw;
-  height: 80vh;
+  width: 85vw;
+  height: 85vh;
   background: url("https://picsum.photos/800") no-repeat fixed right top;
   background-size: 50% 100%;
   position: absolute;

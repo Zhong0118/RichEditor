@@ -7,26 +7,27 @@ def _hash_password(password):
 
 
 class User:
-    def __init__(self, uid, username, email, password, is_paid=False, duration=0, start_date=None):
+    def __init__(self, uid, username, email, password, avatar, is_paid=False, duration=0, start_date=None):
         self.uid = uid  # 用户ID
         self.username = username  # 用户名
         self.password = password  # 密码
         self.email = email  # 邮箱
+        self.avatar = avatar  # 头像路径
         self.is_paid = is_paid  # 是否已支付
         self.duration = duration  # 付费持续天数
         self.start_date = start_date  # 付费开始时间
 
 
 class Document:
-    def __init__(self, did, share_id, is_shared, title, content, create_time, finish_time, metadata, owner_id):
+    def __init__(self, did, share_id, is_shared, title, content, createTime, updateTime, tag, owner_id):
         self.did = did  # 文档ID
         self.share_id = share_id  # 文档共享ID
         self.is_shared = is_shared  # 文档是否共享
         self.title = title  # 文档标题
         self.content = content  # 文档内容
-        self.create_time = create_time  # 文档初始化时间
-        self.finish_time = finish_time  # 文档最后一次编辑结束时间
-        self.metadata = metadata  # 文档标签
+        self.createTime = createTime  # 文档初始化时间
+        self.updateTime = updateTime  # 文档最后一次编辑结束时间
+        self.tag = tag  # 文档标签
         self.owner_id = owner_id  # 文档作者id
         self.medias = []  # 文档中媒体文件列表
 

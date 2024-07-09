@@ -28,6 +28,14 @@ const router = createRouter({
         title: "登陆注册", // 定义标题
       },
     },
+    {
+      path: "/editor",
+      name: "editor",
+      component: () => import("@/views/EditorPage.vue"),
+      meta: {
+        title: "BD-Note | 您的编辑器", // 定义标题
+      },
+    }
   ],
 });
 NProgress.configure({

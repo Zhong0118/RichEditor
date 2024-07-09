@@ -7,7 +7,7 @@ import Section4 from "@/components/home/Section4.vue";
 import Section5 from "@/components/home/Section5.vue";
 import Footer from "@/components/home/Footer.vue";
 import { onMounted, onUnmounted, reactive, ref } from "vue";
-import SvgIcon from "@/ui/svg-icon.vue";
+import ScrollReveal from "scrollreveal";
 
 const sections = reactive({
   index: "首页",
@@ -24,12 +24,27 @@ function handleScroll() {
   top.value = window.scrollY >= 100;
 }
 
+const sr = ScrollReveal({
+  orient: "top",
+  distance: "80px",
+  duration: 2000,
+  delay: 400,
+  reset: true,
+});
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener("scroll", handleScroll);
+  sr.reveal(`.index-title1`, { origin: "top" });
+  sr.reveal(`.index-title2`, { origin: "left" });
+  sr.reveal(`.index-title3`, { origin: "right" });
+  sr.reveal(`.index-title4`, { origin: "bottom" });
+  sr.reveal(`.title1`, { origin: "top" });
+  sr.reveal(`.title2`, { origin: "left" });
+  sr.reveal(`.title3`, { origin: "right" });
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener("scroll", handleScroll);
+  sr.destroy();
 });
 </script>
 
@@ -41,8 +56,8 @@ onUnmounted(() => {
   <Section4></Section4>
   <Section5></Section5>
   <Footer></Footer>
-  <a v-show="top" :class="{'active': top}" class="back-top-btn" href="#index">
-    <SvgIcon name="lamb-top"></SvgIcon>
+  <a v-show="top" :class="{ active: top }" class="back-top-btn" href="#">
+    <i class="pi pi-arrow-up"></i>
   </a>
 </template>
 
@@ -51,14 +66,14 @@ onUnmounted(() => {
   position: fixed;
   bottom: 4rem;
   right: 2rem;
-  background-color: var(--doing2);
-  font-size: 1rem;
+  font-size: 14px;
   padding: 0.5rem;
   z-index: 10;
   opacity: 0;
   visibility: hidden;
   transition: 0.5s;
   border-radius: 0.5rem;
+  background: var(--basic3);
 }
 
 .back-top-btn.active {

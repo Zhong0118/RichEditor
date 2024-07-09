@@ -35,7 +35,6 @@ const props = defineProps({
   sections: Object,
 });
 </script>
-
 <template>
   <div
     :class="{
@@ -43,7 +42,7 @@ const props = defineProps({
       'bg-slate-50': isSticky,
       'drop-shadow-md': isSticky,
     }"
-    class="navbar fixed pl-[5%] pr-[5%]"
+    class="navbar fixed pl-[5%] pr-[5%] z-10"
   >
     <div class="navbar-start">
       <button
@@ -55,12 +54,8 @@ const props = defineProps({
     </div>
     <div class="navbar-center lg:flex">
       <ul class="menu menu-horizontal px-1">
-        <li
-          v-for="(section, index) in sections"
-          :key="index"
-          class="mr-2"
-        >
-          <a :href="'#' + index" >
+        <li v-for="(section, index) in sections" :key="index" class="mr-2">
+          <a :href="'#' + index">
             {{ section }}
           </a>
         </li>
@@ -72,7 +67,6 @@ const props = defineProps({
       </RouterLink>
     </div>
   </div>
-  <div class="h-[100]"></div>
 </template>
 
 <style scoped>
@@ -88,4 +82,5 @@ ul li a {
   font-family: OPPOSans, sans-serif;
   font-size: 16px;
 }
+
 </style>

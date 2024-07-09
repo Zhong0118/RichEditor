@@ -1,3 +1,5 @@
+import random
+
 from flask import jsonify
 
 from backend.models import _hash_password
@@ -20,11 +22,13 @@ def login_verify(username, password):
 
 def register_verify(username, password, email):
     user = user_collection.find_one({'username': username})
+    random_index = random.randint(1, 5)
+    avatar = '@/assets/avatar/avatar' + str(random_index) + '.png'
     if user:
         return jsonify({'message': '用户名已经存在了'}), 400
     else:
         password = _hash_password(password)
-        uid = user_collection.insert_one({'username': username, 'password': password, 'email': email}).inserted_id
+        uid = user_collection.insert_one({'username': username, 'password': password, 'email': email, 'avatar': avatar}).inserted_id
         user = {'_id': str(uid), 'username': username, 'password': password}
         return jsonify({'message': 'ok', 'user': user}), 200
 

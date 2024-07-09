@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@primevue/themes": "^4.0.0",
     "@tiptap/extension-bullet-list": "^2.4.0",
     "@tiptap/extension-character-count": "^2.4.0",
     "@tiptap/extension-code-block-lowlight": "^2.4.0",
@@ -31,6 +32,7 @@
     "axios": "^1.7.2",
     "cal-heatmap": "^4.2.4",
     "d3": "^7.9.0",
+    "dayjs": "^1.11.11",
     "echarts": "^5.5.1",
     "echarts-wordcloud": "^2.1.0",
     "gsap": "^3.12.5",
@@ -42,6 +44,8 @@
     "nprogress": "^0.2.0",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.0.0",
     "qrcode": "^1.5.3",
     "remixicon": "^4.3.0",
     "sass": "^1.77.6",
@@ -49,12 +53,14 @@
     "scrolltrigger": "^1.0.1",
     "sweetalert2": "^11.12.1",
     "tiptap": "^1.32.2",
+    "typescript": "^5.5.3",
     "vite-plugin-svg-icons": "^2.0.1",
     "vue": "^3.4.31",
     "vue-router": "^4.4.0",
-    "vuestic-ui": "^1.9.12"
+    "vue3-infinite-list": "^0.2.5"
   },
   "devDependencies": {
+    "@types/mockjs": "^1.0.10",
     "@vitejs/plugin-vue": "^5.0.5",
     "autoprefixer": "^10.4.19",
     "daisyui": "^4.12.10",

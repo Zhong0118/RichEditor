@@ -2,7 +2,6 @@
 import { ref } from "vue";
 import loginRigForForm from "@/components/login/loginRigForForm.vue";
 import showPassword from "@/components/login/showPassword.vue";
-import SvgIcon from "@/ui/svg-icon.vue";
 import { useAuth } from "@/hooks/useAuth";
 import Swal from "sweetalert2";
 
@@ -55,10 +54,9 @@ function registerIn(username, password) {
         <span class="label-text text-xl text-[var(--login4)]">邮箱</span>
       </div>
       <div>
-        <SvgIcon
-          class="absolute left-2.5 top-1/2 translate-y-1/2 text-[20px] opacity-70"
-          name="email"
-        ></SvgIcon>
+        <i
+          class="pi pi-envelope absolute left-2.5 top-1/2 translate-y-[80%] text-[20px] opacity-70"
+        ></i>
         <input
           v-model="email"
           class="input w-full grow pl-10"

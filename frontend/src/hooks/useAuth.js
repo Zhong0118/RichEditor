@@ -22,9 +22,10 @@ export function useAuth() {
           const user = {
             uid: response.data.user._id,
             username: response.data.user.username,
+            avatar: response.data.user.avatar,
           };
           userStore.setUser(user); // 存储用户信息
-          window.location.href = "/home"; // 跳转到主页
+          window.location.href = "/editor"; // 跳转到编辑界面
         });
       } else {
         const errorMessage = response.data.message || "未知错误";

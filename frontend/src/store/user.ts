@@ -4,6 +4,7 @@ import { ref } from "vue";
 type User = {
   uid: string;
   username: string;
+  avatar: string;
 };
 export const useUserStore = defineStore(
   "user",
@@ -16,11 +17,11 @@ export const useUserStore = defineStore(
     };
     // 清空用户，退出后使用
     const delUser = () => {
-      user.value = undefined;
+      user.value = void 0;
     };
     return { user, setUser, delUser };
   },
   {
     persist: true,
-  },
+  }
 );
