@@ -36,7 +36,7 @@ import Typography from "@tiptap/extension-typography";
 import Underline from "@tiptap/extension-underline";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import EditorMenu from "@/components/editor/editorbody/EditorMenu.vue";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import TextStyle from "@tiptap/extension-text-style";
@@ -45,39 +45,31 @@ import CodeBlockComponent from "@/components/editor/editorbody/CodeBlockComponen
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
+import OutlineList from "@/components/editor/editorbody/OutlineList.vue";
 
 const lowlight = createLowlight();
 lowlight.register({ html, ts, css, js, python, java, json, c });
 
+const headings = ref<any>([]);
 const loadHeadings = () => {
-  const headings = [] as any[];
-  if (!editor.value) return;
-  const transaction = editor.value.state.tr;
-  if (!transaction) return;
-
-  editor.value?.state.doc.descendants((node, pos) => {
-    if (node.type.name === "heading") {
-      const start = pos;
-      const end = pos + node.content.size;
-      const id = `heading-${headings.length + 1}`;
-      if (node.attrs.id !== id) {
-        transaction?.setNodeMarkup(pos, undefined, {
-          ...node.attrs,
-          id,
+  // 获取整个文档结构
+  const doc = editor.value?.getJSON();
+  if (!doc) return;
+  headings.value = doc.content?.reduce((accumulator, node) => {
+    const processNode = (n: any) => {
+      if (n.type === "heading" && n.content && Array.isArray(n.content)) {
+        const level = parseInt(n.attrs.level, 10);
+        const text = n.content[0].text;
+        console.log(text);
+        accumulator.push({
+          level: level,
+          text: text,
         });
       }
-      headings.push({
-        level: node.attrs.level,
-        text: node.textContent,
-        start,
-        end,
-        id,
-      });
-    }
-  });
-  transaction?.setMeta("addToHistory", false);
-  transaction?.setMeta("preventUpdate", true);
-  editor.value?.view.dispatch(transaction);
+    };
+    processNode(node);
+    return accumulator;
+  }, []);
 };
 
 // 编辑器初始化
@@ -126,7 +118,9 @@ const editor = useEditor({
     CharacterCount.configure({
       limit: 100000,
     }),
-    Heading,
+    Heading.configure({
+      levels: [1, 2, 3, 4],
+    }),
   ],
   injectCSS: false,
   autofocus: true,
@@ -174,29 +168,12 @@ onUnmounted(() => {
         class="relative h-full w-full overflow-y-hidden border-l-[1px] border-solid border-l-[--border-color] bg-[--small-doc] pb-10 pt-10"
       >
         <h1
-          class="misans absolute top-2 w-full border-b-[2px] border-solid border-b-[--border-color] text-3xl font-bold"
+          class="misans absolute top-2 w-full border-b-[2px] border-solid border-b-[--border-color] text-3xl font-bold text-[--small-text]"
         >
           内容大纲
         </h1>
         <div class="m-2 h-full overflow-y-scroll">
-          <ul class="menu w-full rounded-box">
-            <li><a class="opposans">Item 1</a></li>
-            <li>
-              <a>Parent</a>
-              <ul>
-                <li><a>Submenu 1</a></li>
-                <li><a>Submenu 2</a></li>
-                <li>
-                  <a>Parent</a>
-                  <ul>
-                    <li><a>Submenu 1</a></li>
-                    <li><a>Submenu 2</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li><a>Item 3</a></li>
-          </ul>
+          <OutlineList :headings="headings"></OutlineList>
         </div>
         <h1
           class="misans absolute bottom-1 w-full border-t-[2px] border-solid border-t-[--border-color] bg-[--panel-color] text-xl font-bold"
