@@ -23,7 +23,9 @@
       ]
     },
     "allowJs": true,
-     "checkJs": true,                                  /* Enable error reporting in type-checked JavaScript files. */
+    "checkJs": true,
+    "allowImportingTsExtensions": true,
+    /* Enable error reporting in type-checked JavaScript files. */
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -31,6 +33,7 @@
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.d.ts",
     "src/**/*.vue",
     "src/*.js"
   ],

@@ -10,7 +10,7 @@ export default {
     lg: "992px",
     xl: "1200px",
   },
-  plugins: [require("daisyui")],
+  plugins: [require("daisyui"), require('@tailwindcss/typography')],
   daisyui: {
     themes: ["emerald", "dark"], // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
     darkTheme: "dark", // name of one of the included themes for dark mode

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { defineEmits, ref } from "vue";
 import loginRigForForm from "@/components/login/loginRigForForm.vue";
 import showPassword from "@/components/login/showPassword.vue";
@@ -12,7 +12,7 @@ const buttonText = "登录";
 
 const isVisible = ref(false); // 初始状态，密码不可见
 
-const handleVisibilityChange = (newValue) => {
+const handleVisibilityChange = (newValue : boolean) => {
   isVisible.value = newValue;
 };
 
@@ -23,7 +23,7 @@ const onForgetPasswordClick = () => {
 
 const { requestAuth, checkWhole } = useAuth();
 
-function loginIn(username, password) {
+function loginIn(username : string, password : string) {
   const info = { a: username, b: password };
   if (checkWhole(info)) {
     const config = {

@@ -3,35 +3,35 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import VirtualScroller from "primevue/virtualscroller";
 import DocCard from "@/components/editor/leftnav/DocCard.vue";
 import Swal from "sweetalert2";
-import emitter from "@/hooks/mitter";
-import { useDocumentStore } from "@/store/document";
+import emitter from "@/hooks/mitter.js";
+import { useDocumentStore } from "@/store/document.ts";
 import Mock from "mockjs";
-import { Document, renameType } from "@/types/DocumentType";
+import { customAlphabet } from "nanoid";
+import { Document, renameType } from "@/types/DocumentType.ts";
 
 const documentStore = useDocumentStore();
 
 const count = ref(0);
+const share_id_string =
+  "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
+const nanoid = customAlphabet(share_id_string, 8);
+const tag_color_list = ["", "badge-success", "badge-ghost", "badge-accent"];
 
 function generateRandomDocuments(): Document[] {
   const randomDocument = () => ({
     did: Mock.Random.id(), // 生成随机 ID
-    title: Mock.Random.cword(5, 10), // 生成随机长度的标题（5 到 10 个词）
-    share_id: Mock.Random.string("lowercase"), // 生成随机小写字符串作为 share_id
-    is_shared: Mock.Random.boolean(), // 随机布尔值表示是否共享
+    title: nanoid(), //
+    share_id: nanoid(),
+    is_shared: false, // 随机布尔值表示是否共享
     createTime: Mock.Random.date("yyyy-MM-dd").toString(), // 生成随机日期作为创建时间
     updateTime: Mock.Random.date("yyyy-MM-dd").toString(), // 生成随机日期作为更新时间
     tag: Mock.Random.cword(1, 3), // 生成随机长度的标签（1 到 3 个词）
     content: Mock.Random.paragraph(), // 生成随机段落作为内容
-    tag_color: Mock.Random.pick([
-      "",
-      "badge-success",
-      "badge-ghost",
-      "badge-accent",
-    ]),
+    tag_color: Mock.Random.pick(tag_color_list),
   });
 
   return Mock.mock({
-    "list|15": [randomDocument], //
+    "list|30": [randomDocument], //
   }).list; // 返回生成的 Document 数组
 }
 
@@ -48,7 +48,11 @@ function changeSort(value: string) {
 
 const filterDocList = computed(() => {
   // 创建一个 docList 的副本并进行排序，而不是直接修改 docList
-  return [...docList.value].sort((a, b) => {
+  let tempList = [...docList.value];
+  if (searchQuery.value !== "") {
+    tempList = tempList.filter((doc) => doc.title.includes(searchQuery.value));
+  }
+  return tempList.sort((a, b) => {
     switch (sortBy.value) {
       case "titleAcs":
         return a.title.localeCompare(b.title);
@@ -91,7 +95,7 @@ const deleteDoc = (did: string) => {
       docList.value = docList.value.filter((doc) => doc.did !== did);
       if (documentStore.document === undefined) {
         return;
-      } else if (did === documentStore.document.did) {
+      } else if (did === documentStore.getDid()) {
         documentStore.delDocument();
       }
     }
@@ -109,10 +113,10 @@ const changeTag = (did: string) => {
     reverseButtons: true, // 交换确认和取消按钮的位置
     inputAttributes: {
       maxlength: "8", // 设置最大长度限制，这里设置为20字符
-      placeholder: "最多输入8个字符" // 设置输入框占位符
+      placeholder: "最多输入8个字符", // 设置输入框占位符
     },
     customClass: {
-      input: "w-[40%] ml-auto mr-auto" // 你的自定义类，需要在 CSS 中定义
+      input: "w-[40%] ml-auto mr-auto", // 你的自定义类，需要在 CSS 中定义
     },
   }).then((result) => {
     if (result.isConfirmed) {
@@ -121,13 +125,13 @@ const changeTag = (did: string) => {
         const doc = docList.value.find((doc) => doc.did === did);
         if (doc) {
           doc.tag = newTag; // 更新文档的标签
-          documentStore.document.tag = newTag; // 更新当前文档的标签
+          documentStore.changeTag(newTag); // 更新当前文档的标签
         }
       }
     }
   });
 };
-watch(docList, (newDocList) => {
+watch(filterDocList, (newDocList) => {
   count.value = newDocList.length;
 });
 
@@ -168,7 +172,12 @@ onUnmounted(() => {
       class="input input-bordered flex h-8 w-[82%] items-center gap-2 pl-2 pr-0.5 text-[12px]"
     >
       <i class="pi pi-search"></i>
-      <input class="grow" placeholder="输入标题" type="text" v-model="searchQuery"/>
+      <input
+        v-model="searchQuery"
+        class="grow"
+        placeholder="输入标题"
+        type="text"
+      />
     </label>
     <div class="dropdown dropdown-bottom content-center">
       <i

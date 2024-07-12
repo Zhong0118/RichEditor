@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import loginRigForForm from "@/components/login/loginRigForForm.vue";
 import showPassword from "@/components/login/showPassword.vue";
@@ -13,12 +13,12 @@ const buttonText = "注册";
 const email = ref("");
 const isVisible = ref(false); // 初始状态，密码不可见
 
-const handleVisibilityChange = (newValue) => {
+const handleVisibilityChange = (newValue : boolean) => {
   isVisible.value = newValue;
 };
 const { requestAuth, checkWhole } = useAuth();
 
-function registerIn(username, password) {
+function registerIn(username : string, password : string) {
   const e = email.value;
   const info = { a: username, b: password, c: e };
   if (checkWhole(info)) {

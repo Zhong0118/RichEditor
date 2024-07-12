@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { useDocumentStore } from "@/store/document";
+import { useDocumentStore } from "@/store/document.ts";
 import { computed, nextTick, ref } from "vue";
-import { useUnSelect } from "@/hooks/useUnSelect";
-import emitter from "@/hooks/mitter";
-import { renameType } from "@/types/DocumentType";
+import { useUnSelect } from "@/hooks/useUnSelect.js";
+import emitter from "@/hooks/mitter.js";
+import { renameType } from "@/types/DocumentType.ts";
+import { useShare } from "@/hooks/useShare.js";
 
 const { unSelect } = useUnSelect();
 
@@ -13,9 +14,7 @@ const currentDocument = computed(() => {
     return {
       did: "NULL",
       title: "暂无文档",
-      createTime: "",
-      updateTime: "",
-      tag: "",
+      is_shared: false,
     };
   } else {
     return documentStore.document;
@@ -57,7 +56,7 @@ function cancelRename() {
 function confirmRename() {
   const newTitle = headerEditableTitle.value.textContent.trim();
   if (documentStore.document !== undefined) {
-    documentStore.document.title = newTitle;
+    documentStore.changeTitle(newTitle);
     const renameData: renameType = {
       did: documentStore.document.did,
       newTitle: newTitle,
@@ -87,6 +86,19 @@ function locateCurrent() {
     emitter.emit("locate-current", currentDocument.value.did);
   }
 }
+
+const { shareDocument } = useShare();
+
+function shareCheck() {
+  if (
+    currentDocument.value.did === "NULL" ||
+    documentStore.document === undefined
+  ) {
+    unSelect();
+  } else {
+    shareDocument();
+  }
+}
 </script>
 
 <template>
@@ -105,25 +117,32 @@ function locateCurrent() {
       {{ currentDocument.title }}
     </h1>
     <div class="flex flex-row">
-      <i
-        class="pi pi-map-marker mr-2 rounded-[4px] p-2 hover:bg-[--basic3]"
-        title="定位到当前位置"
-        @click.prevent="locateCurrent"
-      ></i>
+      <div
+        class="tooltip tooltip-bottom mr-2 rounded-[4px] hover:bg-[--basic3]"
+        data-tip="定位到当前位置"
+      >
+        <i class="pi pi-map-marker p-2" @click.prevent="locateCurrent"></i>
+      </div>
+
       <button
         class="opposans btn btn-primary mr-2 h-[30px] min-h-[32px] pl-3 pr-3"
       >
         <i class="pi pi-save" style="font-size: 14px"></i>
         保存
       </button>
-      <i
-        class="pi pi-external-link mr-2 rounded-[4px] p-2 hover:bg-[--basic2]"
-        title="共享"
-      ></i>
-      <i
-        class="pi pi-filter mr-2 rounded-[4px] p-2 hover:bg-[--basic2]"
-        title="查找"
-      ></i>
+      <div
+        class="tooltip tooltip-bottom mr-2 rounded-[4px] hover:bg-[--basic2]"
+        data-tip="共享"
+      >
+        <i class="pi pi-external-link p-2" @click="shareCheck"></i>
+      </div>
+      <div
+        class="tooltip tooltip-bottom mr-2 rounded-[4px] hover:bg-[--basic2]"
+        data-tip="查找"
+      >
+        <i class="pi pi-filter p-2"></i>
+      </div>
+
       <div class="dropdown dropdown-left dropdown-bottom content-center">
         <i
           class="pi pi-ellipsis-v rounded-[4px] p-2 hover:bg-[--basic2]"

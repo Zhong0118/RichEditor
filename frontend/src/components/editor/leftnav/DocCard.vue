@@ -2,6 +2,9 @@
 import { computed, nextTick, ref } from "vue";
 import { useDocumentStore } from "@/store/document";
 import { Document, renameType } from "@/types/DocumentType";
+import { useShare } from "@/hooks/useShare";
+
+const { shareCancel } = useShare();
 
 const props = withDefaults(
   defineProps<{
@@ -24,7 +27,7 @@ const current = computed(() => {
   if (documentStore.document === undefined) {
     return false;
   } else {
-    return documentStore.document.did === props.doc.did;
+    return documentStore.getDid() === props.doc.did;
   }
 });
 
@@ -58,13 +61,12 @@ function confirmRename() {
     canRename.value = false;
   }
   if (current.value) {
-    if (documentStore.document !== undefined) {
-      documentStore.document.title = newTitle;
-    }
+    documentStore.changeTitle(newTitle);
   }
 }
 
 function selectDocument() {
+  shareCancel();
   const d = {
     did: props.doc.did,
     title: props.doc.title,

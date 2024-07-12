@@ -1,16 +1,16 @@
-<script setup>
-import { useUserStore } from "@/store/user";
+<script setup lang="ts">
+import { useUserStore } from "@/store/user.ts";
 import Divider from "primevue/divider";
 import { onMounted, onUnmounted, ref, watch } from "vue";
-import { useThemeStore } from "@/store/theme";
-import emitter from "@/hooks/mitter";
+import { useThemeStore } from "@/store/theme.js";
+import emitter from "@/hooks/mitter.js";
 
 const userStore = useUserStore();
 const user = userStore.user;
-const userName = user.username;
-const userId = user.uid;
-let userAvatar = user.avatar;
-userAvatar = userAvatar.replace("@", "/src");
+const userName = user?.username;
+const userId = user?.uid;
+let userAvatar = user?.avatar;
+userAvatar = userAvatar?.replace("@", "/src");
 
 const vipUrl = ref("/src/assets/avatar/vip1.svg");
 
@@ -29,7 +29,6 @@ function logout() {
   window.location.href = "/home";
 }
 
-const searchTitle = ref("");
 
 function createOneDoc() {
   emitter.emit('create-doc')
@@ -86,9 +85,9 @@ function createOneDoc() {
       <div class="flex flex-row gap-0.5">
         <img :src="vipUrl" alt="icon-vip" class="w-8" />
         <Divider layout="vertical" type="dashed" />
-        <a class="opposans link link-primary content-center text-[14px]"
-          >开通会员</a
-        >
+        <a class="opposans link link-primary content-center text-[14px] no-underline"
+          >开通会员
+        </a>
       </div>
       <div class="dropdown mb-auto mt-auto">
         <div

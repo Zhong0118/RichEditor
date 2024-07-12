@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import showPassword from "@/components/login/showPassword.vue";
 import { useUserStore } from "@/store/user";
@@ -9,7 +9,7 @@ const username = ref("");
 const password = ref("");
 const email = ref("");
 const isVisible = ref(false);
-const handleVisibilityChange = (newValue) => {
+const handleVisibilityChange = (newValue : boolean) => {
   isVisible.value = newValue;
 };
 const title = "忘记密码";
@@ -19,7 +19,7 @@ const buttonText = "确认";
 const userStore = useUserStore();
 const { requestAuth, checkWhole } = useAuth();
 
-function resetPassword(username, password, email) {
+function resetPassword(username : string, password : string, email : string) {
   const info = { a: username, b: password, c: email };
   if (checkWhole(info)) {
     const config = {
