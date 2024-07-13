@@ -1,5 +1,29 @@
 <template>
-  <div class="flex h-full items-center justify-center">
+  <div class="flex h-full flex-wrap items-center justify-center">
+    <button
+      class="opposans btn btn-outline border-2 border-dashed btn-success mb-auto mr-2 mt-auto h-[32px] min-h-[32px] pl-[1px] pr-[1px] text-xs"
+    >
+      <span class="iconfont icon-wenku text-[--daisyui-color]">知识库</span>
+    </button>
+    <div class="dropdown">
+      <div
+        class="btn btn-outline border-2 border-dashed btn-success mb-auto mr-1 mt-auto h-[32px] min-h-[32px] w-[72px] min-w-[72px] p-0"
+        role="button"
+        tabindex="0"
+      >
+        <i :class="aiIcon" class="text-[24px] text-[--basic3]"></i>
+        <span class="text-[--basic4]">AI</span>
+        <i class="ri-arrow-down-s-line text-[--basic3]"></i>
+      </div>
+      <ul
+        class="menu dropdown-content right-1/2 z-[10] w-[100px] translate-x-1/2 rounded-[8px] bg-base-100 p-[2px] shadow"
+        tabindex="0"
+      >
+        <li v-for="(item, index) in items10" class="">
+          <EditorButton5 :key="index" :="item" />
+        </li>
+      </ul>
+    </div>
     <el-divider
       direction="vertical"
       style="margin-left: 0; margin-right: 4px"
@@ -175,6 +199,7 @@ import EditorButton from "./EditorButton.vue";
 import EditorButton2 from "./EditorButton2.vue";
 import EditorButton3 from "./EditorButton3.vue";
 import EditorButton4 from "./EditorButton4.vue";
+import EditorButton5 from "./EditorButton5.vue";
 import { ref } from "vue";
 import Swal from "sweetalert2";
 
@@ -183,6 +208,7 @@ const headIcon = ref("ri-heading");
 const fontFamilyIcon = ref("ri-font-sans-serif");
 const fontSizeIcon = ref("ri-font-size-2");
 const alignIcon = ref("ri-timeline-view");
+const aiIcon = ref("iconfont icon-aigc-s");
 
 const textColor = ref("#000000"); // 颜色选择器的颜色值
 const predefineColors = ref([
@@ -274,6 +300,38 @@ function clickLinkInsert() {
 //
 // // 监听编辑器状态变化以重置 headIcon
 // watch(() => props.editor?.state.selection, resetHeadIcon);
+
+/**
+ * AI相关内容
+ */
+const items10 = [
+  {
+    icon: "iconfont icon-pinglun",
+    text: "AI对话",
+    action: ""
+  },
+  {
+    icon: "iconfont icon-OCRshibie",
+    text: "OCR识别",
+    action: ""
+  },
+  {
+    icon: "iconfont icon-yuyin",
+    text: "语音识别",
+    action: ""
+  },
+  {
+    icon: "iconfont icon-shipin1",
+    text: "视频识别",
+    action: ""
+  },
+  {
+    icon: "iconfont icon-fuwenben",
+    text: "一键排版",
+    action: ""
+  },
+];
+
 const items6 = [
   {
     text: "Arial",

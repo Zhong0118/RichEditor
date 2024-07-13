@@ -1,5 +1,12 @@
 <script lang="ts" setup>
-import { EditorContent, useEditor, VueNodeViewRenderer } from "@tiptap/vue-3";
+import ButtonGroup from "primevue/buttongroup";
+import Button from "primevue/button";
+import {
+  BubbleMenu,
+  EditorContent,
+  useEditor,
+  VueNodeViewRenderer,
+} from "@tiptap/vue-3";
 // 表格
 import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
@@ -25,7 +32,7 @@ import c from "highlight.js/lib/languages/c";
 import { createLowlight } from "lowlight";
 // 字数统计
 import CharacterCount from "@tiptap/extension-character-count";
-import { Heading } from "@tiptap/extension-heading";
+import Heading from "@tiptap/extension-heading";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import TaskItem from "@tiptap/extension-task-item";
@@ -46,6 +53,8 @@ import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import OutlineList from "@/components/editor/editorbody/OutlineList.vue";
+
+import request from "axios";
 
 const lowlight = createLowlight();
 lowlight.register({ html, ts, css, js, python, java, json, c });
@@ -146,6 +155,21 @@ const editor = useEditor({
 //   },
 // });
 
+const btnDisabled = ref(false);
+// 调用ai部分功能
+const callAi = async (e: any) => {
+  const { state } = editor.value!;
+  const { from, to } = state.selection;
+  const text = state.doc.textBetween(from, to, " ");
+  btnDisabled.value = true;
+  const { data: responseData } = await request.post("/llm/chat", {});
+  btnDisabled.value = false;
+  if (responseData.code === 200) {
+    console.log(responseData);
+    editor.value?.commands.insertContent(responseData.data);
+  }
+};
+
 onMounted(() => {});
 
 onUnmounted(() => {
@@ -164,6 +188,18 @@ onUnmounted(() => {
         :editor="editor"
         class="prose prose-base min-w-[80%] overflow-y-auto p-2 focus:outline-none"
       />
+      <BubbleMenu
+        v-if="editor"
+        :editor="editor"
+        :tippy-options="{ placement: 'bottom' }"
+      >
+        <ButtonGroup>
+          <Button icon="ri-bubble-chart-line" label="摘要" size="small" severity="secondary"/>
+          <Button icon="ri-magic-line" label="美化" size="small" severity="secondary"/>
+          <Button icon="ri-expand-diagonal-line" label="续写" size="small" severity="secondary"/>
+          <Button icon="ri-translate" label="翻译" size="small" severity="secondary"/>
+        </ButtonGroup>
+      </BubbleMenu>
       <div
         class="relative h-full w-full overflow-y-hidden border-l-[1px] border-solid border-l-[--border-color] bg-[--small-doc] pb-10 pt-10"
       >
