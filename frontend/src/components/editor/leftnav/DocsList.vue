@@ -5,41 +5,31 @@ import DocCard from "@/components/editor/leftnav/DocCard.vue";
 import Swal from "sweetalert2";
 import emitter from "@/hooks/mitter.js";
 import { useDocumentStore } from "@/store/document.ts";
-import Mock from "mockjs";
+import { useUserStore } from "@/store/user.ts";
+import { useDocument } from "@/hooks/useDocument.js";
 import { customAlphabet } from "nanoid";
 import { Document, renameType } from "@/types/DocumentType.ts";
+import { ElMessage } from "element-plus";
 
 const documentStore = useDocumentStore();
+const userStore = useUserStore();
+const {
+  documentsList,
+  getAllDocuments,
+  createDocument,
+  create_did,
+  update_tag,
+  update_title,
+  delete_doc,
+} = useDocument();
 
 const count = ref(0);
 const share_id_string =
   "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
 const nanoid = customAlphabet(share_id_string, 8);
-const tag_color_list = ["", "badge-success", "badge-ghost", "badge-accent"];
+// const tag_color_list = ["", "badge-success", "badge-ghost", "badge-accent"];
 
-function generateRandomDocuments(): Document[] {
-  const randomDocument = () => ({
-    did: Mock.Random.id(), // 生成随机 ID
-    title: nanoid(), //
-    share_id: nanoid(),
-    is_shared: false, // 随机布尔值表示是否共享
-    createTime: Mock.Random.date("yyyy-MM-dd").toString(), // 生成随机日期作为创建时间
-    updateTime: Mock.Random.date("yyyy-MM-dd").toString(), // 生成随机日期作为更新时间
-    tag: Mock.Random.cword(1, 3), // 生成随机长度的标签（1 到 3 个词）
-    content: Mock.Random.paragraph(), // 生成随机段落作为内容
-    tag_color: Mock.Random.pick(tag_color_list),
-  });
-
-  return Mock.mock({
-    "list|30": [randomDocument], //
-  }).list; // 返回生成的 Document 数组
-}
-
-const docList = ref<Document[]>([]);
-docList.value = generateRandomDocuments();
-
-const sortBy = ref("");
-count.value = docList.value.length;
+const sortBy = ref("finishTimeDcs");
 const searchQuery = ref("");
 
 function changeSort(value: string) {
@@ -47,12 +37,13 @@ function changeSort(value: string) {
 }
 
 const filterDocList = computed(() => {
-  // 创建一个 docList 的副本并进行排序，而不是直接修改 docList
-  let tempList = [...docList.value];
+  let tempList = [...documentsList.value];
   if (searchQuery.value !== "") {
-    tempList = tempList.filter((doc) => doc.title.includes(searchQuery.value));
+    tempList = tempList.filter((doc: Document) =>
+      doc.title.includes(searchQuery.value),
+    );
   }
-  return tempList.sort((a, b) => {
+  return tempList.sort((a: Document, b: Document) => {
     switch (sortBy.value) {
       case "titleAcs":
         return a.title.localeCompare(b.title);
@@ -73,13 +64,14 @@ const filterDocList = computed(() => {
     }
   });
 });
+count.value = documentsList.value.length;
 const renameDoc = (data: renameType) => {
-  console.log(data);
-  console.log(data.did);
-  console.log(data.newTitle);
-  const doc = docList.value.find((doc) => doc.did === data.did);
+  const doc = documentsList.value.find((doc: Document) => doc._id === data._id);
   if (doc) {
     doc.title = data.newTitle;
+    const update = new Date().toISOString();
+    doc.updateTime = update;
+    update_title(data._id, data.newTitle, update);
   }
 };
 const deleteDoc = (did: string) => {
@@ -92,7 +84,10 @@ const deleteDoc = (did: string) => {
     showCancelButton: true,
   }).then((result) => {
     if (result.isConfirmed) {
-      docList.value = docList.value.filter((doc) => doc.did !== did);
+      delete_doc(did);
+      documentsList.value = documentsList.value.filter(
+        (doc: Document) => doc._id !== did,
+      );
       if (documentStore.document === undefined) {
         return;
       } else if (did === documentStore.getDid()) {
@@ -122,10 +117,15 @@ const changeTag = (did: string) => {
     if (result.isConfirmed) {
       const newTag = result.value; // 获取用户输入的新标签
       if (newTag) {
-        const doc = docList.value.find((doc) => doc.did === did);
+        const doc = documentsList.value.find(
+          (doc: Document) => doc._id === did,
+        );
         if (doc) {
           doc.tag = newTag; // 更新文档的标签
           documentStore.changeTag(newTag); // 更新当前文档的标签
+          const update = new Date().toISOString();
+          doc.updateTime = update;
+          update_tag(did, newTag, update);
         }
       }
     }
@@ -135,7 +135,39 @@ watch(filterDocList, (newDocList) => {
   count.value = newDocList.length;
 });
 
-function createOneDoc() {}
+const createShow = ref(false);
+const createTitle = ref("");
+const createTag = ref("");
+
+function createOneDoc() {
+  createShow.value = true;
+}
+
+function createConfirm() {
+  const title = createTitle.value;
+  const tag = createTag.value;
+  const share_id = nanoid();
+  const createTime = new Date().toISOString();
+  const uid = userStore.user?.uid;
+  if (title === "" || title === " ") {
+    ElMessage({
+      message: "请输入标题",
+      type: "warning",
+    });
+  } else {
+    createShow.value = false;
+    const doc: Document = {
+      _id: '',
+      updateTime: createTime,
+      createTime: createTime,
+      share_id: share_id,
+      tag: tag,
+      title: title,
+      is_shared: false,
+    };
+    createDocument(uid, doc);
+  }
+}
 
 const virtualScroller = ref();
 const scrollToCurrentDocumentRef = (currentDid: string) => {
@@ -143,14 +175,16 @@ const scrollToCurrentDocumentRef = (currentDid: string) => {
 };
 
 function scrollToCurrentDocument(currentDid: string) {
-  const index = filterDocList.value.findIndex((doc) => doc.did === currentDid);
+  const index = filterDocList.value.findIndex(
+    (doc: Document) => doc._id === currentDid,
+  );
   if (index !== -1) {
-    console.log(index);
     virtualScroller.value.scrollToIndex(index);
   }
 }
 
 onMounted(() => {
+  getAllDocuments();
   emitter.on("create-doc", createOneDoc);
   emitter.on("locate-current", scrollToCurrentDocumentRef);
   emitter.on("header-delete-doc", deleteDoc);
@@ -167,6 +201,23 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <el-dialog v-model="createShow" title="创建文档" width="300">
+    <el-form :model="true">
+      <el-form-item label="文档标题">
+        <el-input v-model="createTitle" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="文档标签">
+        <el-input v-model="createTag" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="createShow = false">取消</el-button>
+        <el-button type="primary" @click="createConfirm"> 确认</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
   <div class="mt-4 flex h-auto flex-row gap-2">
     <label
       class="input input-bordered flex h-8 w-[82%] items-center gap-2 pl-2 pr-0.5 text-[12px]"

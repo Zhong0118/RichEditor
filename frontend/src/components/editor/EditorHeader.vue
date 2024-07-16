@@ -2,17 +2,21 @@
 import { useDocumentStore } from "@/store/document.ts";
 import { computed, nextTick, ref } from "vue";
 import { useUnSelect } from "@/hooks/useUnSelect.js";
+import { useDocument } from "@/hooks/useDocument.js";
 import emitter from "@/hooks/mitter.js";
 import { renameType } from "@/types/DocumentType.ts";
 import { useShare } from "@/hooks/useShare.js";
+import { ElLoading } from "element-plus";
 
 const { unSelect } = useUnSelect();
+
+const { debounceUpdateDocumentInDB } = useDocument();
 
 const documentStore = useDocumentStore();
 const currentDocument = computed(() => {
   if (documentStore.document === undefined) {
     return {
-      did: "NULL",
+      _id: "NULL",
       title: "暂无文档",
       is_shared: false,
     };
@@ -25,7 +29,7 @@ const headerEditableTitle = ref();
 const canRename = ref(false);
 const handleDelete = (did: string) => {
   if (
-    currentDocument.value.did === "NULL" ||
+    currentDocument.value._id === "NULL" ||
     documentStore.document === undefined
   ) {
     unSelect();
@@ -36,7 +40,7 @@ const handleDelete = (did: string) => {
 
 const focusOnTitle = () => {
   if (
-    currentDocument.value.did === "NULL" ||
+    currentDocument.value._id === "NULL" ||
     documentStore.document === undefined
   ) {
     unSelect();
@@ -58,7 +62,7 @@ function confirmRename() {
   if (documentStore.document !== undefined) {
     documentStore.changeTitle(newTitle);
     const renameData: renameType = {
-      did: documentStore.document.did,
+      _id: documentStore.document._id,
       newTitle: newTitle,
     };
     emitter.emit("header-rename-doc", renameData);
@@ -67,23 +71,23 @@ function confirmRename() {
 
 function changeTag() {
   if (
-    currentDocument.value.did === "NULL" ||
+    currentDocument.value._id === "NULL" ||
     documentStore.document === undefined
   ) {
     unSelect();
   } else {
-    emitter.emit("header-change-tag", currentDocument.value.did);
+    emitter.emit("header-change-tag", currentDocument.value._id);
   }
 }
 
 function locateCurrent() {
   if (
-    currentDocument.value.did === "NULL" ||
+    currentDocument.value._id === "NULL" ||
     documentStore.document === undefined
   ) {
     unSelect();
   } else {
-    emitter.emit("locate-current", currentDocument.value.did);
+    emitter.emit("locate-current", currentDocument.value._id);
   }
 }
 
@@ -91,12 +95,33 @@ const { shareDocument } = useShare();
 
 function shareCheck() {
   if (
-    currentDocument.value.did === "NULL" ||
+    currentDocument.value._id === "NULL" ||
     documentStore.document === undefined
   ) {
     unSelect();
   } else {
     shareDocument();
+  }
+}
+
+const loading = ref(false);
+
+function saveDocument() {
+  if (
+    currentDocument.value._id === "NULL" ||
+    documentStore.document === undefined
+  ) {
+    unSelect();
+  } else {
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: "保存中，请稍候...",
+      background: "rgba(0, 0, 0, 0.7)",
+    });
+    loading.value = true;
+    debounceUpdateDocumentInDB();
+    loading.value = false;
+    loadingInstance.close();
   }
 }
 </script>
@@ -126,6 +151,7 @@ function shareCheck() {
 
       <button
         class="opposans btn btn-primary mr-2 h-[30px] min-h-[32px] pl-3 pr-3"
+        @click="saveDocument"
       >
         <i class="pi pi-save" style="font-size: 14px"></i>
         保存
@@ -158,7 +184,7 @@ function shareCheck() {
           <li @click="changeTag"><a class="opposans">修改标签</a></li>
           <li @click="focusOnTitle"><a class="opposans">重命名</a></li>
           <hr />
-          <li @click="handleDelete(currentDocument.did)">
+          <li @click="handleDelete(currentDocument._id)">
             <a class="opposans text-[--tododelete]">删除</a>
           </li>
         </ul>

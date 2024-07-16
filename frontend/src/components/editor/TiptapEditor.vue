@@ -54,7 +54,14 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import OutlineList from "@/components/editor/editorbody/OutlineList.vue";
 
+import {useDocumentStore} from "@/store/document.ts";
+const documentStore = useDocumentStore();
+
 import request from "axios";
+import emitter from "@/hooks/mitter.js";
+import { useDocument } from "@/hooks/useDocument.js";
+
+const {debounceGetContent, getContent} = useDocument();
 
 const lowlight = createLowlight();
 lowlight.register({ html, ts, css, js, python, java, json, c });
@@ -135,25 +142,12 @@ const editor = useEditor({
   autofocus: true,
   onUpdate({ editor }) {
     loadHeadings();
+    documentStore.setDocumentContent(editor.getJSON())
   },
   onCreate({ editor }) {
     loadHeadings();
   },
 });
-
-// defineExpose({
-//   insert: (text) => {
-//     editor.value
-//       ?.chain()
-//       .focus()
-//       .command(({ tr }) => {
-//         // 在事务中执行以下代码
-//         tr.insertText(text);
-//         return true;
-//       })
-//       .run();
-//   },
-// });
 
 const btnDisabled = ref(false);
 // 调用ai部分功能
@@ -170,10 +164,19 @@ const callAi = async (e: any) => {
   }
 };
 
-onMounted(() => {});
+const updateContent = async () => {
+  editor.value!.commands.setContent(`<h1><span style="color:#ec6a52;">正在读取文本内容...</span></h1>`);
+  await getContent();
+  editor.value!.commands.setContent(documentStore.document?.content!);
+}
+
+onMounted(() => {
+  emitter.on("change-content", updateContent)
+});
 
 onUnmounted(() => {
   editor.value!.destroy();
+  emitter.off('change-content', updateContent);
 });
 </script>
 <template>
@@ -194,10 +197,30 @@ onUnmounted(() => {
         :tippy-options="{ placement: 'bottom' }"
       >
         <ButtonGroup>
-          <Button icon="ri-bubble-chart-line" label="摘要" size="small" severity="secondary"/>
-          <Button icon="ri-magic-line" label="美化" size="small" severity="secondary"/>
-          <Button icon="ri-expand-diagonal-line" label="续写" size="small" severity="secondary"/>
-          <Button icon="ri-translate" label="翻译" size="small" severity="secondary"/>
+          <Button
+            icon="ri-bubble-chart-line"
+            label="摘要"
+            severity="secondary"
+            size="small"
+          />
+          <Button
+            icon="ri-magic-line"
+            label="美化"
+            severity="secondary"
+            size="small"
+          />
+          <Button
+            icon="ri-expand-diagonal-line"
+            label="续写"
+            severity="secondary"
+            size="small"
+          />
+          <Button
+            icon="ri-translate"
+            label="翻译"
+            severity="secondary"
+            size="small"
+          />
         </ButtonGroup>
       </BubbleMenu>
       <div

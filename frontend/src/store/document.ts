@@ -12,9 +12,9 @@ export const useDocumentStore = defineStore(
 
     const getDid = () => {
       if (document.value) {
-        return document.value.did;
+        return document.value._id;
       }
-    }
+    };
     const changeTag = (tag: string) => {
       if (document.value) {
         document.value.tag = tag;
@@ -41,6 +41,14 @@ export const useDocumentStore = defineStore(
     const delDocument = () => {
       document.value = void 0;
     };
+
+    // 在你的 useDocumentStore 中
+    function setDocumentContent(content : any) {
+      if (document.value) {
+        document.value.content = content;
+      }
+    }
+
     return {
       document,
       setDocument,
@@ -49,10 +57,11 @@ export const useDocumentStore = defineStore(
       changeTag,
       changeShared,
       changeUpdateTime,
-      getDid
+      getDid,
+      setDocumentContent,
     };
   },
   {
-    persist: true,
+    persist: false,
   },
 );

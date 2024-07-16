@@ -1,10 +1,14 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref } from "vue";
-import { useDocumentStore } from "@/store/document";
-import { Document, renameType } from "@/types/DocumentType";
-import { useShare } from "@/hooks/useShare";
+import { useDocumentStore } from "@/store/document.ts";
+import { useDocument } from "@/hooks/useDocument.js";
+import { Document, renameType } from "@/types/DocumentType.ts";
+import { useShare } from "@/hooks/useShare.js";
+import emitter from "@/hooks/mitter.js";
 
 const { shareCancel } = useShare();
+
+const { debounceGetContent, getContent } = useDocument();
 
 const props = withDefaults(
   defineProps<{
@@ -27,15 +31,15 @@ const current = computed(() => {
   if (documentStore.document === undefined) {
     return false;
   } else {
-    return documentStore.getDid() === props.doc.did;
+    return documentStore.getDid() === props.doc._id;
   }
 });
 
 const emit = defineEmits(["delete-doc", "rename-doc"]);
 
-const handleDelete = (did: string) => {
+const handleDelete = (_id: string) => {
   // 假设 parentEmit 是一个用于向父组件发送事件的方法
-  emit("delete-doc", did);
+  emit("delete-doc", _id);
 };
 
 const focusOnTitle = () => {
@@ -54,7 +58,7 @@ function confirmRename() {
   const newTitle = editableTitle.value.textContent.trim();
   if (newTitle !== props.doc.title) {
     const renameData: renameType = {
-      did: props.doc.did,
+      _id: props.doc._id,
       newTitle: newTitle,
     };
     emit("rename-doc", renameData);
@@ -68,17 +72,21 @@ function confirmRename() {
 function selectDocument() {
   shareCancel();
   const d = {
-    did: props.doc.did,
+    _id: props.doc._id,
     title: props.doc.title,
     share_id: props.doc.share_id,
     is_shared: props.doc.is_shared,
     createTime: props.doc.createTime,
     updateTime: props.doc.updateTime,
     tag: props.doc.tag,
-    content: "asdf",
     tag_color: props.doc.tag_color,
   };
   documentStore.setDocument(d);
+    emitter.emit("change-content");
+}
+
+function splitTime(time: string) {
+  return time.substring(0, 10);
 }
 </script>
 
@@ -112,7 +120,7 @@ function selectDocument() {
           tabindex="0"
         >
           <li @click="focusOnTitle"><a class="opposans">重命名</a></li>
-          <li @click="handleDelete(props.doc.did)">
+          <li @click="handleDelete(props.doc._id)">
             <a class="opposans text-[--tododelete]">删除</a>
           </li>
         </ul>
@@ -120,16 +128,15 @@ function selectDocument() {
     </div>
     <div
       v-if="doc.tag"
-      :class="doc.tag_color"
       :title="doc.tag"
-      class="opposans badge max-w-[60%] overflow-hidden whitespace-nowrap rounded-[8px] text-[12px] font-bold"
+      class="opposans badge badge-ghost max-w-[60%] overflow-hidden whitespace-nowrap rounded-[8px] text-[12px] font-bold"
     >
       {{ doc.tag }}
     </div>
     <p class="select-none text-[12px] text-[--small-text]">
-      {{ doc.createTime }}
+      {{ splitTime(doc.createTime) }}
       &nbsp|&nbsp
-      {{ doc.updateTime }}
+      {{ splitTime(doc.updateTime) }}
     </p>
   </div>
 </template>

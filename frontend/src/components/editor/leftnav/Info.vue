@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useUserStore } from "@/store/user.ts";
+import { useDocumentStore } from "@/store/document.ts";
 import Divider from "primevue/divider";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useThemeStore } from "@/store/theme.js";
 import emitter from "@/hooks/mitter.js";
 
 const userStore = useUserStore();
+const documentStore = useDocumentStore();
 const user = userStore.user;
 const userName = user?.username;
 const userId = user?.uid;
@@ -26,6 +28,7 @@ watch(toggleTheme, (newVal) => {
 function logout() {
   userStore.delUser();
   themeStore.delTheme();
+  documentStore.delDocument();
   window.location.href = "/home";
 }
 
@@ -94,18 +97,19 @@ function createOneDoc() {
           class="btn btn-primary h-[36px] min-h-[30px]"
           role="button"
           tabindex="0"
+          @click="createOneDoc"
         >
           <i class="pi pi-plus-circle"></i>创建笔记
         </div>
-        <div
-          class="card dropdown-content card-compact z-[1] mt-2 w-64 rounded-[8px] bg-[--panel2-color] p-2 text-primary-content shadow"
-          tabindex="0"
-        >
-          <div class="card-body">
-            <h3 class="opposans card-title text-[14px]">新建笔记</h3>
-            <p>you can use any element as a dropdown.</p>
-          </div>
-        </div>
+<!--        <div-->
+<!--          class="card dropdown-content card-compact z-[1] mt-2 w-64 rounded-[8px] bg-[&#45;&#45;panel2-color] p-2 text-primary-content shadow"-->
+<!--          tabindex="0"-->
+<!--        >-->
+<!--          <div class="card-body">-->
+<!--            <h3 class="opposans card-title text-[14px]">新建笔记</h3>-->
+<!--            <p>you can use any element as a dropdown.</p>-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
     </div>
   </div>
