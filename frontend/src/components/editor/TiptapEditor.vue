@@ -54,14 +54,15 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import OutlineList from "@/components/editor/editorbody/OutlineList.vue";
 
-import {useDocumentStore} from "@/store/document.ts";
-const documentStore = useDocumentStore();
-
-import request from "axios";
+import { useDocumentStore } from "@/store/document.ts";
 import emitter from "@/hooks/mitter.js";
 import { useDocument } from "@/hooks/useDocument.js";
+import http from "@/utils/requests.ts";
+import { ElMessage } from "element-plus";
 
-const {debounceGetContent, getContent} = useDocument();
+const documentStore = useDocumentStore();
+
+const { getContent } = useDocument();
 
 const lowlight = createLowlight();
 lowlight.register({ html, ts, css, js, python, java, json, c });
@@ -142,44 +143,143 @@ const editor = useEditor({
   autofocus: true,
   onUpdate({ editor }) {
     loadHeadings();
-    documentStore.setDocumentContent(editor.getJSON())
+    documentStore.setDocumentContent(editor.getJSON());
   },
   onCreate({ editor }) {
     loadHeadings();
   },
 });
-
-const btnDisabled = ref(false);
+const resultDialog = ref();
+const selectBubble = ref(false);
+const selectOption = ref(-1);
+const promptText = ref("");
+const bubbleResult = ref("生成中....");
 // 调用ai部分功能
 const callAi = async (e: any) => {
   const { state } = editor.value!;
   const { from, to } = state.selection;
   const text = state.doc.textBetween(from, to, " ");
-  btnDisabled.value = true;
-  const { data: responseData } = await request.post("/llm/chat", {});
-  btnDisabled.value = false;
-  if (responseData.code === 200) {
-    console.log(responseData);
-    editor.value?.commands.insertContent(responseData.data);
+  bubbleResult.value = "";
+  const response = await fetch("http://localhost:5000/api/bubblechat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type: e,
+      content: text,
+      promptText: promptText.value,
+    }),
+  });
+  const reader = response.body!.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    const chunk = new TextDecoder().decode(value);
+    bubbleResult.value += chunk;
+    if (done) {
+      break;
+    }
   }
+  reader.releaseLock();
+  selectOption.value = -1;
 };
 
-const updateContent = async () => {
-  editor.value!.commands.setContent(`<h1><span style="color:#ec6a52;">正在读取文本内容...</span></h1>`);
-  await getContent();
-  editor.value!.commands.setContent(documentStore.document?.content!);
+function bubbleCancel() {
+  selectOption.value = -1;
+  selectBubble.value = false;
+  promptText.value = "";
+  bubbleResult.value = "生成中....";
 }
 
+function bubbleAI() {
+  bubbleResult.value = "生成中....";
+  selectBubble.value = false;
+  resultDialog.value.showModal();
+  callAi(selectOption.value);
+  promptText.value = "";
+}
+
+function clipResult() {
+  navigator.clipboard.writeText(bubbleResult.value);
+  ElMessage({
+    message: '成功复制到剪切板',
+    type: 'success',
+  })
+}
+
+const updateContent = async () => {
+  editor.value!.commands.setContent(
+    `<h1><span style="color:#ec6a52;">正在读取文本内容...</span></h1>`,
+  );
+  await getContent();
+  editor.value!.commands.setContent(documentStore.document?.content!);
+  loadHeadings();
+};
+
 onMounted(() => {
-  emitter.on("change-content", updateContent)
+  emitter.on("change-content", updateContent);
 });
 
 onUnmounted(() => {
   editor.value!.destroy();
-  emitter.off('change-content', updateContent);
+  emitter.off("change-content", updateContent);
 });
 </script>
 <template>
+  <dialog id="answerDialog" ref="resultDialog" class="modal">
+    <div class="modal-box">
+      <form method="dialog">
+        <button class="btm-circle btn btn-ghost btn-sm absolute right-2 top-2">
+          <i class="ri-close-line"></i>
+        </button>
+      </form>
+      <h3 class="alidongfang text-lg font-bold">AI回答</h3>
+      <p class="opposans py-4">{{ bubbleResult }}</p>
+      <form>
+        <button class="opposans btn" @click.prevent="clipResult">
+          <i class="ri-clipboard-line"></i>复制
+        </button>
+      </form>
+    </div>
+  </dialog>
+
+  <div
+    v-show="selectBubble"
+    class="fixed right-1/2 top-1/4 z-20 w-96 max-w-5xl translate-x-1/2 rounded-lg bg-slate-200 dark:bg-slate-900"
+  >
+    <div
+      class="rounded-lg rounded-b-none border border-slate-300 bg-slate-50 px-2 py-2 dark:border-slate-700 dark:bg-slate-800"
+    >
+      <label class="opposans sr-only" for="prompt-input">输入Prompt</label>
+      <textarea
+        id="prompt-input"
+        v-model="promptText"
+        class="opposans w-full border-0 bg-slate-50 px-0 text-base text-slate-900 focus:outline-none dark:bg-slate-800 dark:text-slate-200 dark:placeholder-slate-400"
+        placeholder="输入 Prompt"
+        required
+        rows="6"
+      ></textarea>
+    </div>
+    <div class="ml-2 flex items-center justify-end py-2 pr-2">
+      <div>
+        <button
+          class="opposans inline-flex items-center gap-x-2 rounded-lg bg-blue-600 px-4 py-2.5 text-center text-base font-medium text-slate-50 hover:bg-blue-800 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900"
+          @click="bubbleAI"
+        >
+          发送
+          <i class="ri-send-plane-line"></i>
+        </button>
+        <button
+          class="opposans ml-2 inline-flex items-center gap-x-2 rounded-lg bg-slate-700 px-4 py-2.5 text-center text-base font-medium text-slate-50 hover:bg-blue-600 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900"
+          type="button"
+          @click="bubbleCancel"
+        >
+          取消
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+    </div>
+  </div>
   <div class="h-[90%]">
     <div
       class="h-[8%] w-full border-b-[1px] border-solid border-b-[--border-color]"
@@ -202,24 +302,40 @@ onUnmounted(() => {
             label="摘要"
             severity="secondary"
             size="small"
+            @click="
+              selectOption = 0;
+              selectBubble = true;
+            "
           />
           <Button
             icon="ri-magic-line"
             label="美化"
             severity="secondary"
             size="small"
+            @click="
+              selectOption = 1;
+              selectBubble = true;
+            "
           />
           <Button
             icon="ri-expand-diagonal-line"
             label="续写"
             severity="secondary"
             size="small"
+            @click="
+              selectOption = 2;
+              selectBubble = true;
+            "
           />
           <Button
             icon="ri-translate"
             label="翻译"
             severity="secondary"
             size="small"
+            @click="
+              selectOption = 3;
+              selectBubble = true;
+            "
           />
         </ButtonGroup>
       </BubbleMenu>

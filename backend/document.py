@@ -6,6 +6,7 @@ from db_config import DBConfig
 dbconfig = DBConfig()
 db = dbconfig.get_db()
 document_collection = db['Document']
+template_collection = db['Template']
 
 
 def get_all_document(owner_id):
@@ -56,5 +57,23 @@ def save_one_document(did, update, content):
 
 def get_one_content(did):
     content = document_collection.find_one({'_id': ObjectId(did)}, {'content': 1, '_id': 0})
-    print(content)
+    # print(content)
     return jsonify({'message': 'ok', 'text': content['content']}), 200
+
+
+def export_one_template(owner_id, title, content):
+    template_collection.insert_one({'title': title, 'content': content, 'owner_id': owner_id, 'is_public': False})
+    return jsonify({'message': 'ok'}), 200
+
+
+def get_all_templates(owner_id):
+    templates = template_collection.find({'$or': [{'is_public': True}, {'owner_id': owner_id}]})
+    templates_str_id = []
+    for template in templates:
+        template_str_id = {
+            '_id': str(template['_id']) if '_id' in template else None,  # 确保_id存在并且转换为字符串
+        }
+        template_str_id.update({k: v for k, v in template.items() if k != '_id'})
+        templates_str_id.append(template_str_id)
+    # print(templates_str_id)
+    return jsonify({'templates': templates_str_id}), 200

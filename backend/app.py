@@ -1,4 +1,5 @@
-from flask import Flask, request
+import erniebot
+from flask import Flask, request, Response
 from flask_cors import CORS
 
 from auth import *
@@ -7,6 +8,9 @@ from document import *
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+
+erniebot.api_type = 'aistudio'
+erniebot.access_token = '6c12f745fe9aefb5fbc3a5b14bc033b9fbf9d7b2'
 
 
 @app.route('/api/login', methods=['POST'])
@@ -88,6 +92,60 @@ def save_one():
 def get_doc_content():
     did = request.args.get('did')
     return get_one_content(did)
+
+
+@app.route('/api/documents/export', methods=['POST'])
+def export_template():
+    data = request.json
+    owner_id = data.get('owner_id')
+    title = data.get('title')
+    content = data.get('content')
+    return export_one_template(owner_id, title, content)
+
+
+@app.route('/api/gettemplates', methods=['GET'])
+def get_templates():
+    owner_id = request.args.get('owner_id')
+    return get_all_templates(owner_id)
+
+
+@app.route('/api/applytemplate', methods=['POST'])
+def apply_template():
+    data = request.json
+    doc = data.get('doc')
+    owner_id = data.get('owner_id')
+    return create_document(doc.get('title'), doc.get('content'), doc.get('tag'), owner_id, doc.get('createTime'),
+                           doc.get('share_id'))
+
+
+def generate_stream(aires):
+    try:
+        for chunk in aires:
+            print(chunk.get_result())
+            yield f"{chunk.get_result()}"
+    except GeneratorExit:
+        print("客户端失连")
+
+
+@app.route('/api/bubblechat', methods=['POST'])
+def bubble_chat():
+    data = request.get_json()
+    index = int(data.get('type'))
+    content = data.get('content')
+    prompt_text = data.get('promptText')
+    prompts = [
+        f"请你帮忙提取这段话的摘要'{content}'，尽可能依据'{prompt_text}'的条件。",
+        f"请你帮忙润色这段话'{content}'，使其更有逻辑，同时依据'{prompt_text}'的条件。",
+        f"请你根据这段话的大概含义进行续写'{content}'，依据'{prompt_text}'的条件。",
+        f"请你帮忙对这段话进行翻译'{content}'，要注意精准度，依据'{prompt_text}'的条件。",
+    ]
+    print(prompts[index])
+    response = erniebot.ChatCompletion.create(
+        model='ernie-bot',
+        messages=[{'role': 'user', 'content': prompts[index]}],
+        stream=True,
+    )
+    return Response(generate_stream(response), content_type='text/event-stream')
 
 
 if __name__ == '__main__':

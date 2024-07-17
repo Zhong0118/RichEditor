@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import loginRigForForm from "@/components/login/loginRigForForm.vue";
 import showPassword from "@/components/login/showPassword.vue";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth.js";
 import Swal from "sweetalert2";
 
 const formType = "register";

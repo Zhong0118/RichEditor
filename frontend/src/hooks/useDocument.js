@@ -33,6 +33,7 @@ function debounce(fn, wait, immediate) {
 
 export function useDocument() {
   const documentsList = ref([]);
+  const templatesList = ref([]);
   const create_did = ref("");
   const owner_id = userStore.user?.uid;
 
@@ -262,6 +263,105 @@ export function useDocument() {
     }
   }
 
+  async function showTemplates() {
+    try {
+      const response = await http.request({
+        method: "GET",
+        url: `/api/gettemplates?owner_id=${encodeURIComponent(owner_id)}`,
+      });
+      if (response.status === 200) {
+        templatesList.value = Object.values(response.data.templates); // 更新文档列表
+      }
+    } catch (error) {
+      await Swal.fire({
+        title: "获取模板列表失败",
+        text: error.message,
+        position: "top",
+        icon: "error",
+        toast: true,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+    }
+  }
+
+  async function applyTemplate(doc) {
+    try {
+      const response = await http.request({
+        method: "POST",
+        url: "api/applytemplate", // 假设你的API端点是/documents
+        data: {
+          owner_id: owner_id,
+          doc: doc,
+        },
+      });
+      if (response.status === 200) {
+        await Swal.fire({
+          text: "应用成功",
+          icon: "success",
+          toast: true,
+          position: "top",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+        const newDocument = {
+          ...doc,
+          _id: response.data.did,
+        };
+        documentsList.value.unshift(newDocument); // 将新文档添加到列表开头
+        documentStore.setDocument(newDocument); // 更新 documentStore
+      }
+    } catch (error) {
+      await Swal.fire({
+        title: "应用失败",
+        text: error.message,
+        icon: "error",
+        position: "top",
+        toast: true,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+    }
+  }
+
+  async function exportTemplate() {
+    if (documentStore.document) {
+      try {
+        // 使用 Axios 或其他 HTTP 客户端发送请求
+        const response = await http.request({
+          method: "POST",
+          url: "/api/documents/export",
+          data: {
+            title: documentStore.document.title,
+            content: documentStore.document.content,
+            owner_id: owner_id,
+          },
+        });
+        if (response.status === 200) {
+          // 更新成功
+          await Swal.fire({
+            text: "导出成功",
+            icon: "success",
+            position: "top",
+            toast: true,
+            timer: 2000,
+            timerProgressBar: true,
+          });
+        }
+      } catch (error) {
+        // 处理错误
+        await Swal.fire({
+          text: "导出失败",
+          icon: "error",
+          position: "top",
+          toast: true,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      }
+    }
+  }
+
   const debounceUpdateDocumentInDB = debounce(updateDocumentInDB, 1000);
   const debounceGetContent = debounce(getContent, 1000);
 
@@ -276,5 +376,9 @@ export function useDocument() {
     debounceUpdateDocumentInDB,
     debounceGetContent,
     getContent,
+    exportTemplate,
+    showTemplates,
+    applyTemplate,
+    templatesList,
   };
 }

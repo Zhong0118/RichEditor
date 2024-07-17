@@ -10,7 +10,7 @@ import { ElLoading } from "element-plus";
 
 const { unSelect } = useUnSelect();
 
-const { debounceUpdateDocumentInDB } = useDocument();
+const { debounceUpdateDocumentInDB, exportTemplate } = useDocument();
 
 const documentStore = useDocumentStore();
 const currentDocument = computed(() => {
@@ -124,6 +124,25 @@ function saveDocument() {
     loadingInstance.close();
   }
 }
+
+async function exportATemplate() {
+  if (
+    currentDocument.value._id === "NULL" ||
+    documentStore.document === undefined
+  ) {
+    unSelect();
+  } else {
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: "导出中，请稍候...",
+      background: "rgba(0, 0, 0, 0.7)",
+    });
+    loading.value = true;
+    await exportTemplate();
+    loading.value = false;
+    loadingInstance.close();
+  }
+}
 </script>
 
 <template>
@@ -178,7 +197,7 @@ function saveDocument() {
           class="menu dropdown-content z-[1] w-32 rounded-[8px] bg-[--panel-color] p-2 shadow"
           tabindex="0"
         >
-          <li><a class="opposans">导出为模板</a></li>
+          <li><a class="opposans" @click="exportATemplate">导出为模板</a></li>
           <li><a class="opposans">导出为 pdf</a></li>
           <hr />
           <li @click="changeTag"><a class="opposans">修改标签</a></li>

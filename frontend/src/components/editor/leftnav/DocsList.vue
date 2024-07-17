@@ -21,6 +21,9 @@ const {
   update_tag,
   update_title,
   delete_doc,
+  showTemplates,
+  templatesList,
+  applyTemplate,
 } = useDocument();
 
 const count = ref(0);
@@ -139,6 +142,10 @@ const createShow = ref(false);
 const createTitle = ref("");
 const createTag = ref("");
 
+const templateShow = ref(false);
+const templateTitle = ref("");
+const templateTag = ref("");
+
 function createOneDoc() {
   createShow.value = true;
 }
@@ -157,7 +164,7 @@ function createConfirm() {
   } else {
     createShow.value = false;
     const doc: Document = {
-      _id: '',
+      _id: "",
       updateTime: createTime,
       createTime: createTime,
       share_id: share_id,
@@ -167,6 +174,49 @@ function createConfirm() {
     };
     createDocument(uid, doc);
   }
+}
+
+const templateId = ref("")
+function templateOneDoc() {
+  templateShow.value = true;
+  showTemplates();
+}
+
+function templateConfirm() {
+  const title = templateTitle.value;
+  const tag = templateTag.value;
+  const share_id = nanoid();
+  const createTime = new Date().toISOString();
+  const selectedTemplate = templatesList.value.find(
+    (template) => template._id === templateId.value,
+  );
+  if (!selectedTemplate) {
+    ElMessage({
+      message: "模板不存在",
+      type: "error",
+    });
+    return;
+  }
+
+  if (!title.trim()) {
+    ElMessage({
+      message: "请输入标题",
+      type: "warning",
+    });
+    return;
+  }
+  templateShow.value = false;
+  const doc: Document = {
+    _id: "",
+    updateTime: createTime,
+    createTime: createTime,
+    share_id: share_id,
+    tag: tag,
+    title: title,
+    content: selectedTemplate.content, // 使用找到的模板对象的 content
+    is_shared: false,
+  };
+  applyTemplate(doc);
 }
 
 const virtualScroller = ref();
@@ -186,6 +236,7 @@ function scrollToCurrentDocument(currentDid: string) {
 onMounted(() => {
   getAllDocuments();
   emitter.on("create-doc", createOneDoc);
+  emitter.on("apply-template", templateOneDoc);
   emitter.on("locate-current", scrollToCurrentDocumentRef);
   emitter.on("header-delete-doc", deleteDoc);
   emitter.on("header-rename-doc", renameDoc);
@@ -193,6 +244,7 @@ onMounted(() => {
 });
 onUnmounted(() => {
   emitter.off("create-doc", createOneDoc);
+  emitter.off("apply-template", templateOneDoc);
   emitter.off("locate-current", scrollToCurrentDocumentRef);
   emitter.off("header-delete-doc", deleteDoc);
   emitter.off("header-rename-doc", renameDoc);
@@ -214,6 +266,34 @@ onUnmounted(() => {
       <div class="dialog-footer">
         <el-button @click="createShow = false">取消</el-button>
         <el-button type="primary" @click="createConfirm"> 确认</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="templateShow" title="应用模板" width="300">
+    <el-form :model="true">
+      <el-form-item label="模板选择">
+        <el-select v-model="templateId">
+          <el-option
+            v-for="template in templatesList"
+            :key="template._id"
+            :label="template.title"
+            :value="template._id"
+          >
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="文档标题">
+        <el-input v-model="templateTitle" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="文档标签">
+        <el-input v-model="templateTag" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="templateShow = false">取消</el-button>
+        <el-button type="primary" @click="templateConfirm"> 确认</el-button>
       </div>
     </template>
   </el-dialog>
