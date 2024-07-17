@@ -40,6 +40,14 @@ def forget():
     return forget_verify(username, password, email)
 
 
+@app.route('/api/setvip', methods=['POST'])
+def vip():
+    data = request.json
+    uid = data.get('uid')
+    set_vip(uid)
+    return jsonify({'message': 'VIP status updated'}), 200
+
+
 @app.route('/api/getdocuments', methods=['GET'])
 def get_all_documents():
     owner_id = request.args.get('owner_id')
@@ -138,6 +146,7 @@ def bubble_chat():
         f"请你帮忙润色这段话'{content}'，使其更有逻辑，同时依据'{prompt_text}'的条件。",
         f"请你根据这段话的大概含义进行续写'{content}'，依据'{prompt_text}'的条件。",
         f"请你帮忙对这段话进行翻译'{content}'，要注意精准度，依据'{prompt_text}'的条件。",
+        f"根据'{prompt_text}'的条件，请把这段HTML内容：'{content}'进行自动格式排版，优化结构，你需要紧紧贴合给你提供的内容或者依靠条件，返回markdown格式文本，如果有可能的的话我希望你能自动整理我的主题大意，从而返回更符合我需求的内容。",
     ]
     print(prompts[index])
     response = erniebot.ChatCompletion.create(

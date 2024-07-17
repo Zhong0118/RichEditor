@@ -148,6 +148,9 @@ importers:
       lowlight:
         specifier: ^3.1.0
         version: 3.1.0
+      marked:
+        specifier: ^13.0.2
+        version: 13.0.2
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
@@ -172,9 +175,6 @@ importers:
       primevue:
         specifier: ^4.0.0
         version: 4.0.0(@primeuix/utils@0.0.5)(vue@3.4.31(typescript@5.5.3))
-      qrcode:
-        specifier: ^1.5.3
-        version: 1.5.3
       remixicon:
         specifier: ^4.3.0
         version: 4.3.0
@@ -208,6 +208,9 @@ importers:
       vue:
         specifier: ^3.4.31
         version: 3.4.31(typescript@5.5.3)
+      vue-qrcode:
+        specifier: ^2.2.2
+        version: 2.2.2(qrcode@1.5.3)(vue@3.4.31(typescript@5.5.3))
       vue-router:
         specifier: ^4.4.0
         version: 4.4.0(vue@3.4.31(typescript@5.5.3))
@@ -1940,6 +1943,11 @@ packages:
     resolution: {integrity: sha512-a54IwgWPaeBCAAsv13YgmALOF1elABB08FxO9i+r4VFk5Vl4pKokRPeX8u5TCgSsPi6ec1otfLjdOpVcgbpshg==}
     hasBin: true
 
+  marked@13.0.2:
+    resolution: {integrity: sha512-J6CPjP8pS5sgrRqxVRvkCIkZ6MFdRIjDkwUwgJ9nL2fbmM6qGQeB2C16hi8Cc9BOzj6xXzy0jyi0iPIfnMHYzA==}
+    engines: {node: '>= 18'}
+    hasBin: true
+
   material-design-icons-iconfont@6.7.0:
     resolution: {integrity: sha512-lSj71DgVv20kO0kGbs42icDzbRot61gEDBLQACzkUuznRQBUYmbxzEkGU6dNBb5fRWHMaScYlAXX96HQ4/cJWA==}
 
@@ -2642,6 +2650,9 @@ packages:
   tslib@2.3.0:
     resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
 
+  tslib@2.6.3:
+    resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
+
   typed-array-buffer@1.0.2:
     resolution: {integrity: sha512-gEymJYKZtKXzzBzM4jqa9w6Q1Jjm7x2d+sh19AdsD4wqnMPDYyvwpsIc2Q/835kHuo3BEQ7CjelGhfTsoBb2MQ==}
     engines: {node: '>= 0.4'}
@@ -2752,6 +2763,12 @@ packages:
     peerDependenciesMeta:
       '@vue/composition-api':
         optional: true
+
+  vue-qrcode@2.2.2:
+    resolution: {integrity: sha512-SbrXq/mSb1g2tbDyXPe9gy9KiMYsvxWKRErlpij1BqiFoHwQckheZV63CTw6yRLLUVG2RXAVlX+APkpdCK7SQQ==}
+    peerDependencies:
+      qrcode: ^1.0.0
+      vue: ^2.7.0 || ^3.0.0
 
   vue-router@4.4.0:
     resolution: {integrity: sha512-HB+t2p611aIZraV2aPSRNXf0Z/oLZFrlygJm+sZbdJaW6lcFqEDQwnzUBXn+DApw+/QzDU/I9TeWx9izEjTmsA==}
@@ -4572,6 +4589,8 @@ snapshots:
       punycode.js: 2.3.1
       uc.micro: 2.1.0
 
+  marked@13.0.2: {}
+
   material-design-icons-iconfont@6.7.0: {}
 
   mdn-data@2.0.14: {}
@@ -5361,6 +5380,8 @@ snapshots:
 
   tslib@2.3.0: {}
 
+  tslib@2.6.3: {}
+
   typed-array-buffer@1.0.2:
     dependencies:
       call-bind: 1.0.7
@@ -5469,6 +5490,12 @@ snapshots:
 
   vue-demi@0.14.8(vue@3.4.31(typescript@5.5.3)):
     dependencies:
+      vue: 3.4.31(typescript@5.5.3)
+
+  vue-qrcode@2.2.2(qrcode@1.5.3)(vue@3.4.31(typescript@5.5.3)):
+    dependencies:
+      qrcode: 1.5.3
+      tslib: 2.6.3
       vue: 3.4.31(typescript@5.5.3)
 
   vue-router@4.4.0(vue@3.4.31(typescript@5.5.3)):

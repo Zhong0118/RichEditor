@@ -202,6 +202,7 @@ import EditorButton4 from "./EditorButton4.vue";
 import EditorButton5 from "./EditorButton5.vue";
 import { ref } from "vue";
 import Swal from "sweetalert2";
+import emitter from "@/hooks/mitter.js";
 
 const props = defineProps<{ editor: Editor }>();
 const headIcon = ref("ri-heading");
@@ -328,7 +329,8 @@ const items10 = [
   {
     icon: "iconfont icon-fuwenben",
     text: "一键排版",
-    action: ""
+    action: () =>
+      emitter.emit('structure-sort')
   },
 ];
 

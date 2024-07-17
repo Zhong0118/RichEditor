@@ -14,7 +14,7 @@ def get_all_document(owner_id):
     documents_str_id = []
     for doc in documents:
         doc_str_id = {
-            '_id': str(doc['_id']) if '_id' in doc else None,  # 确保_id存在并且转换为字符串
+            '_id': str(doc['_id']) if '_id' in doc else None,
         }
         doc_str_id.update({k: v for k, v in doc.items() if k != '_id'})
         documents_str_id.append(doc_str_id)

@@ -5,6 +5,7 @@ type User = {
   uid: string;
   username: string;
   avatar: string;
+  vip: boolean;
 };
 export const useUserStore = defineStore(
   "user",

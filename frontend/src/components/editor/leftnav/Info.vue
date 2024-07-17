@@ -2,18 +2,30 @@
 import { useUserStore } from "@/store/user.ts";
 import { useDocumentStore } from "@/store/document.ts";
 import Divider from "primevue/divider";
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { useThemeStore } from "@/store/theme.js";
 import emitter from "@/hooks/mitter.js";
+import Swal from "sweetalert2";
+import { customAlphabet } from "nanoid";
+import http from "@/utils/requests.js";
+import VueQrcode from "vue-qrcode";
+
+const share_id_string =
+  "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
+const nanoid = customAlphabet(share_id_string, 6);
+
 const userStore = useUserStore();
 const documentStore = useDocumentStore();
 const user = userStore.user;
 const userName = user?.username;
 const userId = user?.uid;
 let userAvatar = user?.avatar;
+const userVip = ref(user?.vip);
 userAvatar = userAvatar?.replace("@", "/src");
 
-const vipUrl = ref("/src/assets/avatar/vip1.svg");
+const vipUrl1 = ref("/src/assets/avatar/vip1.svg");
+const vipUrl2 = ref("/src/assets/avatar/vip2.svg");
+const vipUrl = userVip.value ? vipUrl2 : vipUrl1;
 
 const themeStore = useThemeStore();
 const toggleTheme = ref(themeStore.theme);
@@ -35,10 +47,71 @@ function createOneDoc() {
   emitter.emit("create-doc");
 }
 
-function chooseOneTemplate(){
-  emitter.emit("apply-template")
+function chooseOneTemplate() {
+  emitter.emit("apply-template");
 }
 
+const code = ref("");
+
+function showQRCodeAndVerify() {
+  code.value = nanoid();
+  const qrCodeContainer = document.createElement("div");
+  qrCodeContainer.style.display = "flex"; // 居中显示二维码
+  qrCodeContainer.style.justifyContent = "center";
+  // 设置二维码的属性和内容
+  new QRCode(qrCodeContainer, {
+    text: code.value,
+    width: 128,
+    height: 128,
+  });
+  qrCodeContainer.title = '';
+  setTimeout(() => {
+    Swal.fire({
+      title: "扫描二维码支付",
+      html: qrCodeContainer.outerHTML,
+      input: "text",
+      inputPlaceholder: "输入购买码",
+      focusConfirm: false,
+      inputAttributes: {
+        maxlength: "6", // 设置最大长度限制，这里设置为20字符
+      },
+      customClass: {
+        input: "w-[40%] ml-auto mr-auto", // 你的自定义类，需要在 CSS 中定义
+      },
+      showCancelButton: true, // 显示取消按钮
+      confirmButtonText: "购买",
+      reverseButtons: true,
+      preConfirm: () => {
+        const userEnteredCode = Swal.getInput()?.value;
+        // 比较用户输入的验证码与生成的验证码
+        if (userEnteredCode?.toLowerCase() === code.value.toLowerCase()) {
+          vipUrl.value = vipUrl2.value;
+          userVip.value = true;
+          http.request({
+            method: "POST",
+            url: "/api/setvip",
+            data: {
+              uid: userId,
+            },
+          });
+        } else {
+          // 验证码不正确，显示错误提示
+          Swal.showValidationMessage("购买码输入错误，请重新输入");
+          return false;
+        }
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "购买成功",
+          text: "您已经是尊贵的VIP用户了",
+          icon: "success",
+          timer: 1500,
+        });
+      }
+    });
+  }, 100); // 小延迟确保 DOM 更新
+}
 </script>
 
 <template>
@@ -88,7 +161,9 @@ function chooseOneTemplate(){
         <img :src="vipUrl" alt="icon-vip" class="w-8" />
         <Divider layout="vertical" type="dashed" />
         <a
+          v-show="!userVip"
           class="opposans link link-primary content-center text-[14px] no-underline"
+          @click.prevent="showQRCodeAndVerify"
           >开通会员
         </a>
       </div>
@@ -111,7 +186,9 @@ function chooseOneTemplate(){
           </li>
           <hr class="mb-1 mt-1" />
           <li>
-            <a class="opposans" @click.prevent="chooseOneTemplate"><i class="ri-article-line"></i>模板选择</a>
+            <a class="opposans" @click.prevent="chooseOneTemplate"
+              ><i class="ri-article-line"></i>模板选择</a
+            >
           </li>
           <hr class="mb-1 mt-1" />
           <li>

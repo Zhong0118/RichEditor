@@ -23,6 +23,7 @@ export function useAuth() {
             uid: response.data.user._id,
             username: response.data.user.username,
             avatar: response.data.user.avatar,
+            vip: response.data.user.vip,
           };
           userStore.setUser(user); // 存储用户信息
           window.location.href = "/editor"; // 跳转到编辑界面

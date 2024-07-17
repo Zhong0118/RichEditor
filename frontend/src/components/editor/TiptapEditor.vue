@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import ButtonGroup from "primevue/buttongroup";
+import { marked } from 'marked';
 import Button from "primevue/button";
 import {
   BubbleMenu,
@@ -153,59 +154,71 @@ const resultDialog = ref();
 const selectBubble = ref(false);
 const selectOption = ref(-1);
 const promptText = ref("");
-const bubbleResult = ref("生成中....");
+
+const bubbleTextResult = ref();
 // 调用ai部分功能
 const callAi = async (e: any) => {
-  const { state } = editor.value!;
-  const { from, to } = state.selection;
-  const text = state.doc.textBetween(from, to, " ");
-  bubbleResult.value = "";
-  const response = await fetch("http://localhost:5000/api/bubblechat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      type: e,
-      content: text,
-      promptText: promptText.value,
-    }),
-  });
-  const reader = response.body!.getReader();
-  while (true) {
-    const { done, value } = await reader.read();
-    const chunk = new TextDecoder().decode(value);
-    bubbleResult.value += chunk;
-    if (done) {
-      break;
-    }
+  let text: string | undefined = "";
+  if (e !== 4) {
+    const { state } = editor.value!;
+    const { from, to } = state.selection;
+    text = state.doc.textBetween(from, to, " ");
+  } else {
+    text = editor.value?.getHTML();
   }
-  reader.releaseLock();
-  selectOption.value = -1;
+  const response = await fetch("http://localhost:5000/api/bubblechat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: e,
+        content: text,
+        promptText: promptText.value,
+      }),
+    });
+    const reader = response.body!.getReader();
+    let returnText = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      const chunk = new TextDecoder().decode(value);
+      returnText += chunk;
+      bubbleTextResult.value.innerHTML = marked.parse(returnText);
+      if (done) {
+        break;
+      }
+    }
+    reader.releaseLock();
+    selectOption.value = -1;
 };
 
 function bubbleCancel() {
   selectOption.value = -1;
   selectBubble.value = false;
   promptText.value = "";
-  bubbleResult.value = "生成中....";
+  bubbleTextResult.value.innerHTML = null;
 }
 
 function bubbleAI() {
-  bubbleResult.value = "生成中....";
   selectBubble.value = false;
   resultDialog.value.showModal();
   callAi(selectOption.value);
   promptText.value = "";
+  selectOption.value = -1;
 }
 
 function clipResult() {
-  navigator.clipboard.writeText(bubbleResult.value);
+  navigator.clipboard.writeText(bubbleTextResult.value.innerText);
   ElMessage({
-    message: '成功复制到剪切板',
-    type: 'success',
-  })
+    message: "成功复制到剪切板",
+    type: "success",
+  });
 }
+
+const structureSort = () => {
+  selectBubble.value = true;
+  selectOption.value = 4;
+};
 
 const updateContent = async () => {
   editor.value!.commands.setContent(
@@ -218,24 +231,26 @@ const updateContent = async () => {
 
 onMounted(() => {
   emitter.on("change-content", updateContent);
+  emitter.on("structure-sort", structureSort);
 });
 
 onUnmounted(() => {
   editor.value!.destroy();
   emitter.off("change-content", updateContent);
+  emitter.off("structure-sort", structureSort);
 });
 </script>
 <template>
   <dialog id="answerDialog" ref="resultDialog" class="modal">
     <div class="modal-box">
       <form method="dialog">
-        <button class="btm-circle btn btn-ghost btn-sm absolute right-2 top-2">
+        <button class="btm-circle btn btn-ghost btn-sm absolute right-2 top-2" @click="bubbleCancel">
           <i class="ri-close-line"></i>
         </button>
       </form>
       <h3 class="alidongfang text-lg font-bold">AI回答</h3>
-      <p class="opposans py-4">{{ bubbleResult }}</p>
-      <form>
+      <span class="opposans py-4" ref="bubbleTextResult"></span>
+      <form class="top-2 flex justify-end">
         <button class="opposans btn" @click.prevent="clipResult">
           <i class="ri-clipboard-line"></i>复制
         </button>

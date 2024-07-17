@@ -54,6 +54,7 @@
     "gsap": "^3.12.5",
     "highlight.js": "^11.9.0",
     "lowlight": "^3.1.0",
+    "marked": "^13.0.2",
     "mitt": "^3.0.1",
     "mockjs": "^1.1.0",
     "nanoid": "^5.0.7",
@@ -62,7 +63,6 @@
     "pinia-plugin-persistedstate": "^3.2.1",
     "primeicons": "^7.0.0",
     "primevue": "^4.0.0",
-    "qrcode": "^1.5.3",
     "remixicon": "^4.3.0",
     "sass": "^1.77.6",
     "scrollreveal": "^4.0.9",
@@ -74,6 +74,7 @@
     "typescript": "^5.5.3",
     "vite-plugin-svg-icons": "^2.0.1",
     "vue": "^3.4.31",
+    "vue-qrcode": "^2.2.2",
     "vue-router": "^4.4.0",
     "vue3-infinite-list": "^0.2.5",
     "yjs": "^13.6.18"
