@@ -143,6 +143,11 @@ async function exportATemplate() {
     loadingInstance.close();
   }
 }
+
+function exportPDF(){
+  emitter.emit('export-pdf');
+}
+
 </script>
 
 <template>
@@ -198,7 +203,7 @@ async function exportATemplate() {
           tabindex="0"
         >
           <li><a class="opposans" @click="exportATemplate">导出为模板</a></li>
-          <li><a class="opposans">导出为 pdf</a></li>
+          <li><a class="opposans" @click="exportPDF">导出为 pdf</a></li>
           <hr />
           <li @click="changeTag"><a class="opposans">修改标签</a></li>
           <li @click="focusOnTitle"><a class="opposans">重命名</a></li>

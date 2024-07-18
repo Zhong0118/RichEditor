@@ -74,7 +74,6 @@
     "typescript": "^5.5.3",
     "vite-plugin-svg-icons": "^2.0.1",
     "vue": "^3.4.31",
-    "vue-qrcode": "^2.2.2",
     "vue-router": "^4.4.0",
     "vue3-infinite-list": "^0.2.5",
     "yjs": "^13.6.18"

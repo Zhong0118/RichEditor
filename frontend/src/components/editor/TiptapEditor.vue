@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import ButtonGroup from "primevue/buttongroup";
-import { marked } from 'marked';
+import { marked } from "marked";
 import Button from "primevue/button";
 import {
   BubbleMenu,
@@ -167,29 +167,29 @@ const callAi = async (e: any) => {
     text = editor.value?.getHTML();
   }
   const response = await fetch("http://localhost:5000/api/bubblechat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: e,
-        content: text,
-        promptText: promptText.value,
-      }),
-    });
-    const reader = response.body!.getReader();
-    let returnText = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      const chunk = new TextDecoder().decode(value);
-      returnText += chunk;
-      bubbleTextResult.value.innerHTML = marked.parse(returnText);
-      if (done) {
-        break;
-      }
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type: e,
+      content: text,
+      promptText: promptText.value,
+    }),
+  });
+  const reader = response.body!.getReader();
+  let returnText = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    const chunk = new TextDecoder().decode(value);
+    returnText += chunk;
+    bubbleTextResult.value.innerHTML = marked.parse(returnText);
+    if (done) {
+      break;
     }
-    reader.releaseLock();
-    selectOption.value = -1;
+  }
+  reader.releaseLock();
+  selectOption.value = -1;
 };
 
 function bubbleCancel() {
@@ -220,6 +220,14 @@ const structureSort = () => {
   selectOption.value = 4;
 };
 
+const exportPdf = async () => {
+  const bodyEditor = editor.value?.getHTML();
+  const printWindow = window.open("about:blank", "打印窗口", "width=1200,height=900");
+  printWindow.document.write(bodyEditor);
+  printWindow.document.close();
+  printWindow.print();
+};
+
 const updateContent = async () => {
   editor.value!.commands.setContent(
     `<h1><span style="color:#ec6a52;">正在读取文本内容...</span></h1>`,
@@ -232,24 +240,29 @@ const updateContent = async () => {
 onMounted(() => {
   emitter.on("change-content", updateContent);
   emitter.on("structure-sort", structureSort);
+  emitter.on("export-pdf", exportPdf);
 });
 
 onUnmounted(() => {
   editor.value!.destroy();
   emitter.off("change-content", updateContent);
   emitter.off("structure-sort", structureSort);
+  emitter.off("export-pdf", exportPdf);
 });
 </script>
 <template>
   <dialog id="answerDialog" ref="resultDialog" class="modal">
     <div class="modal-box">
       <form method="dialog">
-        <button class="btm-circle btn btn-ghost btn-sm absolute right-2 top-2" @click="bubbleCancel">
+        <button
+          class="btm-circle btn btn-ghost btn-sm absolute right-2 top-2"
+          @click="bubbleCancel"
+        >
           <i class="ri-close-line"></i>
         </button>
       </form>
       <h3 class="alidongfang text-lg font-bold">AI回答</h3>
-      <span class="opposans py-4" ref="bubbleTextResult"></span>
+      <span ref="bubbleTextResult" class="opposans py-4"></span>
       <form class="top-2 flex justify-end">
         <button class="opposans btn" @click.prevent="clipResult">
           <i class="ri-clipboard-line"></i>复制

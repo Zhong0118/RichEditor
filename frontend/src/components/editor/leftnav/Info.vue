@@ -8,7 +8,6 @@ import emitter from "@/hooks/mitter.js";
 import Swal from "sweetalert2";
 import { customAlphabet } from "nanoid";
 import http from "@/utils/requests.js";
-import VueQrcode from "vue-qrcode";
 
 const share_id_string =
   "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
