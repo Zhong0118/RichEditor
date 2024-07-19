@@ -16,8 +16,6 @@ import Aura from "@primevue/themes/aura";
 import "primeicons/primeicons.css";
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-import VueQrcode from "vue-qrcode";
-
 const app = createApp(App);
 const pinia = createPinia();
 pinia.use(persist);
@@ -31,5 +29,4 @@ app.use(PrimeVue, {
 });
 app.use(ElementPlus);
 app.component("svg-icon", svgIcon);
-app.component("vue-qrcode", VueQrcode);
 app.mount("#app");

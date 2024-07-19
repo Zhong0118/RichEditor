@@ -57,7 +57,7 @@
         <a class="link-hover link">模板设计</a>
       </nav>
       <nav class="ml-auto mr-auto special-font">
-        <h6 class="footer-title text-[16px]">一些其他内容，暂时没啥</h6>
+        <h6 class="footer-title text-[16px]">交互</h6>
         <a class="link-hover link">About us</a>
         <a class="link-hover link">Contact</a>
         <a class="link-hover link">Jobs</a>

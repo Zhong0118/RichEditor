@@ -1,16 +1,30 @@
+import os
+
+import cv2
 import erniebot
+import numpy as np
 from flask import Flask, request, Response
 from flask_cors import CORS
+from paddleocr import PaddleOCR
 
 from auth import *
 from backend.models import _hash_password
 from document import *
+
+# from paddlespeech.cli.asr.infer import ASRExecutor
+
+# Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
+# 例如`ch`, `en`, `fr`, `german`, `korean`, `japan`
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
 erniebot.api_type = 'aistudio'
 erniebot.access_token = '6c12f745fe9aefb5fbc3a5b14bc033b9fbf9d7b2'
+ocr = PaddleOCR(use_angle_cls=True, lang="ch")
+
+
+# asr = ASRExecutor()
 
 
 @app.route('/api/login', methods=['POST'])
@@ -155,6 +169,67 @@ def bubble_chat():
         stream=True,
     )
     return Response(generate_stream(response), content_type='text/event-stream')
+
+
+@app.route('/api/chat', methods=['POST'])
+def talk_chat():
+    data = request.get_json()
+    content = data.get('content')
+    response = erniebot.ChatCompletion.create(
+        model='ernie-bot',
+        messages=[{'role': 'user', 'content': content}],
+        stream=True,
+    )
+    return Response(generate_stream(response), content_type='text/event-stream')
+
+
+def generate_ocr(aires):
+    try:
+        for chunk in aires:
+            print(chunk[1][0])
+            yield f"{chunk[1][0]}"
+    except GeneratorExit:
+        print("客户端失连")
+
+
+@app.route('/api/imageOCR', methods=['POST'])
+def image_ocr():
+    uid = request.form.get('uid')
+    img = request.files['file']
+    picname = img.filename
+    file = img.read()
+    file = cv2.imdecode(np.frombuffer(file, np.uint8), cv2.IMREAD_COLOR)  # 解码为ndarray
+    imgfile1_path = "./static/images/" + uid + "/"
+    if not os.path.exists(imgfile1_path):
+        os.makedirs(imgfile1_path)
+    img1_path = os.path.join(imgfile1_path, picname)
+    cv2.imwrite(filename=img1_path, img=file)
+    img_path = imgfile1_path + picname
+    result = ocr.ocr(img_path, cls=True)
+    for idx in range(len(result)):
+        res = result[idx]
+        return Response(generate_ocr(res), content_type='text/event-stream')
+
+
+@app.route('/api/asr', methods=['POST'])
+def asr_api():
+    # uid = request.form.get('uid')
+    # audio = request.files['audio']
+    # current_time = datetime.now()
+    # timestr = current_time.strftime('%Y_%m_%d_%H_%M_%S')
+    # audio_name = timestr + ".wav"  # 使用时间戳作为文件名
+    # audio_path = "./static/voice/" + uid + "/"
+    # if not os.path.exists(audio_path):
+    #     os.makedirs(audio_path)
+    # audio_full_path = os.path.join(audio_path, audio_name)
+    # with open(audio_full_path, 'wb') as f:
+    #     f.write(audio.read())
+    # result = asr(audio_file=audio_full_path)
+    # print(result)  # 假设这是你的语音识别结果处理函数
+    result = '你好，我很高兴参加比赛，希望取得好名次。'
+
+    # 返回语音识别结果
+    return Response(result, content_type='text/plain')
 
 
 if __name__ == '__main__':

@@ -40,7 +40,11 @@
         src="@/assets/icons/section1_2.svg"
       />
     </div>
-    <div class="m-auto">aaa</div>
+    <div class="m-auto">
+      <img
+        class="w-80"
+      src="@/assets/images/creative-writing.png"/>
+    </div>
   </div>
 </template>
 

@@ -63,7 +63,7 @@ function showQRCodeAndVerify() {
     width: 128,
     height: 128,
   });
-  qrCodeContainer.title = '';
+  qrCodeContainer.title = "";
   setTimeout(() => {
     Swal.fire({
       title: "扫描二维码支付",
@@ -111,9 +111,40 @@ function showQRCodeAndVerify() {
     });
   }, 100); // 小延迟确保 DOM 更新
 }
+
+const iframeURL = ref("");
+
+function showExcalidraw() {
+  iframeURL.value = "https://excalidraw.com";
+}
+
+function showDrawio() {
+  iframeURL.value = "https://app.diagrams.net/?src=about";
+}
+
+function showGantt() {
+  iframeURL.value = "https://www.iodraw.com/gantt";
+}
+
+function closeIframe() {
+  iframeURL.value = "";
+}
 </script>
 
 <template>
+  <button
+    v-if="iframeURL"
+    class="btn btn-accent btn-xs fixed left-1/2 z-[999] translate-x-1/2"
+    @click.prevent="closeIframe"
+  >
+    close
+  </button>
+  <iframe
+    v-if="iframeURL"
+    :src="iframeURL"
+    class="fixed left-[5%] top-[5%] z-[999] h-[90%] w-[90%] rounded-xl"
+  >
+  </iframe>
   <div class="flex flex-row border-b-[2px] p-[4px]">
     <div class="mr-2 flex flex-col text-center">
       <div class="dropdown">
@@ -190,14 +221,19 @@ function showQRCodeAndVerify() {
             >
           </li>
           <hr class="mb-1 mt-1" />
+          <!--          <li>-->
+          <!--            <a class="opposans" @click.prevent="showGantt"><i class="ri-mind-map"></i>甘特图</a>-->
+          <!--          </li>-->
           <li>
-            <a class="opposans"><i class="ri-mind-map"></i>思维导图</a>
+            <a class="opposans" @click.prevent="showExcalidraw"
+              ><i class="ri-gallery-line"></i>智能画布</a
+            >
           </li>
+          <!--          <li>-->
+          <!--            <a class="opposans" @click.prevent="showDrawio"><i class="ri-flow-chart"></i>UML图</a>-->
+          <!--          </li>-->
           <li>
-            <a class="opposans"><i class="ri-gallery-line"></i>智能画布</a>
-          </li>
-          <li>
-            <a class="opposans"><i class="ri-flow-chart"></i>UML图</a>
+            <a class="opposans"><i class="ri-group-line"></i>共同编辑</a>
           </li>
         </ul>
       </div>

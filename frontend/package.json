@@ -9,6 +9,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "@primevue/themes": "^4.0.0",
     "@tailwindcss/typography": "^0.5.13",
     "@tiptap/core": "^2.4.0",
@@ -74,6 +75,7 @@
     "typescript": "^5.5.3",
     "vite-plugin-svg-icons": "^2.0.1",
     "vue": "^3.4.31",
+    "vue-easy-lightbox": "^1.19.0",
     "vue-router": "^4.4.0",
     "vue3-infinite-list": "^0.2.5",
     "yjs": "^13.6.18"

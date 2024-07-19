@@ -1,5 +1,42 @@
 <script setup>
 import Description from "@/components/home/small/Description.vue";
+import CardOne from "@/components/home/small/CardOne.vue";
+import { reactive } from "vue";
+const card_list = reactive({
+  card1: {
+    img: "/src/assets/images/pic2.jpg",
+    t1: "划词交流",
+  },
+  card2: {
+    img: "/src/assets/images/pic3.jpg",
+    t1: "AI问答",
+  },
+  card3: {
+    img: "/src/assets/images/pic4.jpg",
+    t1: "智能排版",
+  },
+  card4: {
+    img: "/src/assets/images/pic5.jpg",
+    t1: "OCR转换",
+  },
+  card5: {
+    img: "/src/assets/images/pic6.jpg",
+    t1: "语音转换",
+  },
+  card6: {
+    img: "/src/assets/images/pic7.jpg",
+    t1: "表格操作",
+  },
+  card7: {
+    img: "/src/assets/images/pic8.jpg",
+    t1: "pdf导出",
+  },
+  card8: {
+    img: "/src/assets/images/pic9.jpg",
+    t1: "多功能模板",
+
+  },
+});
 </script>
 
 <template>
@@ -9,6 +46,14 @@ import Description from "@/components/home/small/Description.vue";
       <template #title2>8大效率工具，让高效成为习惯</template>
       <template #title3>内嵌多种先进效率工具，多渠道内容一键收藏，创作效率指数提升</template>
     </Description>
+      <div class="mt-2 grid grid-cols-2 grid-rows-4 gap-[20px]">
+      <CardOne v-for="card in card_list" :key="card.t1">
+        <template #img>
+          <img :src="card.img" alt="" class="ml-auto mr-auto w-[600px] mb-8" />
+        </template>
+        <template #t1>{{ card.t1 }}</template>
+      </CardOne>
+    </div>
   </div>
 </template>
 

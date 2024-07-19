@@ -309,17 +309,20 @@ const items10 = [
   {
     icon: "iconfont icon-pinglun",
     text: "AI对话",
-    action: ""
+    action: () =>
+      emitter.emit('ai-talking')
   },
   {
     icon: "iconfont icon-OCRshibie",
     text: "OCR识别",
-    action: ""
+    action: () =>
+      emitter.emit('ocr-recognise')
   },
   {
     icon: "iconfont icon-yuyin",
     text: "语音识别",
-    action: ""
+    action: () =>
+      emitter.emit('voice-recognise')
   },
   {
     icon: "iconfont icon-shipin1",
