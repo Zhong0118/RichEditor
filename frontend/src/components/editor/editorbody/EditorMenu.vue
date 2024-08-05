@@ -2,6 +2,7 @@
   <div class="flex h-full flex-wrap items-center justify-center">
     <button
       class="opposans btn btn-outline border-2 border-dashed btn-success mb-auto mr-2 mt-auto h-[32px] min-h-[32px] pl-[1px] pr-[1px] text-xs"
+      @click.prevent="lib"
     >
       <span class="iconfont icon-wenku text-[--daisyui-color]">知识库</span>
     </button>
@@ -301,7 +302,9 @@ function clickLinkInsert() {
 //
 // // 监听编辑器状态变化以重置 headIcon
 // watch(() => props.editor?.state.selection, resetHeadIcon);
-
+const lib = () => {
+  emitter.emit('lib-upload')
+}
 /**
  * AI相关内容
  */
@@ -334,6 +337,18 @@ const items10 = [
     text: "一键排版",
     action: () =>
       emitter.emit('structure-sort')
+  },
+  {
+    icon: "ri-flow-chart",
+    text: "UML提取",
+    action: () =>
+      emitter.emit('uml-recognise')
+  },
+  {
+    icon: "ri-mind-map",
+    text: "思维提炼",
+    action: () =>
+      emitter.emit('mind-recognise')
   },
 ];
 

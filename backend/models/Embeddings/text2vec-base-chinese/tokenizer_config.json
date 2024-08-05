@@ -1,0 +1,14 @@
+{
+  "cls_token": "[CLS]",
+  "do_lower_case": true,
+  "mask_token": "[MASK]",
+  "model_max_length": 1000000000000000019884624838656,
+  "name_or_path": "hfl/chinese-lert-base",
+  "pad_token": "[PAD]",
+  "sep_token": "[SEP]",
+  "special_tokens_map_file": "/root/.cache/huggingface/hub/models--hfl--chinese-lert-base/snapshots/d579de41695f52b4451ebe0e087a3cfa2b374e7e/special_tokens_map.json",
+  "strip_accents": null,
+  "tokenize_chinese_chars": true,
+  "tokenizer_class": "BertTokenizer",
+  "unk_token": "[UNK]"
+}

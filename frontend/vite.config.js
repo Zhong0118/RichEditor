@@ -6,6 +6,7 @@ import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 import path from "path";
 
 // https://vitejs.dev/config/
+// require("events").EventEmitter.defaultMaxListeners = 20;
 export default defineConfig({
   plugins: [
     vue(),
@@ -16,6 +17,9 @@ export default defineConfig({
       customDomId: "__svg__icons__dom__", // svg的id
     }),
   ],
+  build: {
+    sourcemap: true, // 确保设置为 true 来启用 Source Map
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -30,12 +34,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      'api': {
+      api: {
         ws: true,
-        target: 'http://127.0.0.1:5000',
+        target: "http://127.0.0.1:5000",
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, '')
-      }
-    }
-  }
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
 });

@@ -8,6 +8,7 @@ import emitter from "@/hooks/mitter.js";
 import Swal from "sweetalert2";
 import { customAlphabet } from "nanoid";
 import http from "@/utils/requests.js";
+import HotMap from "@/components/editor/leftnav/HotMap.vue";
 
 const share_id_string =
   "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
@@ -39,11 +40,22 @@ function logout() {
   userStore.delUser();
   themeStore.delTheme();
   documentStore.delDocument();
+  http.request({
+    method: "POST",
+    url: "/api/logout",
+    data: {
+      uid: userId,
+    },
+  });
   window.location.href = "/home";
 }
 
 function createOneDoc() {
   emitter.emit("create-doc");
+}
+
+function createShareDoc() {
+  emitter.emit("create-share-doc");
 }
 
 function chooseOneTemplate() {
@@ -117,21 +129,41 @@ const iframeURL = ref("");
 function showExcalidraw() {
   iframeURL.value = "https://excalidraw.com";
 }
-
+function showTable() {
+  emitter.emit('table-recognise')
+}
 function showDrawio() {
-  iframeURL.value = "https://app.diagrams.net/?src=about";
+  iframeURL.value = "https://www.min2k.com/tools/mermaid/";
 }
 
 function showGantt() {
-  iframeURL.value = "https://www.iodraw.com/gantt";
+  iframeURL.value = "https://www.min2k.com/tools/markmap/";
 }
 
 function closeIframe() {
   iframeURL.value = "";
 }
+
+const showMap = ref(false);
+
+function showHotMap() {
+  showMap.value = true;
+}
 </script>
 
 <template>
+  <div
+    v-show="showMap"
+    class="fixed left-1/2 top-1/4 w-[600px] -translate-x-1/2 rounded-[8px] bg-[--basic2]"
+  >
+    <div class="flex flex-row justify-between p-2">
+      <h3 class="alidongfang text-[24px] font-bold">您的热力图</h3>
+      <button class="btn btn-circle btn-ghost btn-sm" @click="showMap = false">
+        <i class="ri-close-line text-[24px]"></i>
+      </button>
+    </div>
+    <HotMap v-if="showMap"></HotMap>
+  </div>
   <button
     v-if="iframeURL"
     class="btn btn-accent btn-xs fixed left-1/2 z-[999] translate-x-1/2"
@@ -158,7 +190,7 @@ function closeIframe() {
           tabindex="0"
         >
           <li>
-            <a class="opposans">
+            <a class="opposans" @click="showHotMap">
               <i class="pi pi-calendar-clock"></i>个人热力图</a
             >
           </li>
@@ -221,19 +253,30 @@ function closeIframe() {
             >
           </li>
           <hr class="mb-1 mt-1" />
-          <!--          <li>-->
-          <!--            <a class="opposans" @click.prevent="showGantt"><i class="ri-mind-map"></i>甘特图</a>-->
-          <!--          </li>-->
           <li>
             <a class="opposans" @click.prevent="showExcalidraw"
               ><i class="ri-gallery-line"></i>智能画布</a
             >
           </li>
-          <!--          <li>-->
-          <!--            <a class="opposans" @click.prevent="showDrawio"><i class="ri-flow-chart"></i>UML图</a>-->
-          <!--          </li>-->
           <li>
-            <a class="opposans"><i class="ri-group-line"></i>共同编辑</a>
+            <a class="opposans" @click.prevent="showTable"
+              ><i class="ri-grid-line"></i>表格生成</a
+            >
+          </li>
+          <hr class="mb-1 mt-1" />
+
+          <li>
+            <a class="opposans" @click.prevent="showDrawio"><i class="ri-flow-chart"></i>一键UML</a>
+          </li>
+          <li>
+            <a class="opposans" @click.prevent="showGantt"><i class="ri-mind-map"></i>思维导图</a>
+          </li>
+          <hr class="mb-1 mt-1" />
+
+          <li>
+            <a class="opposans" @click.prevent="createShareDoc"
+              ><i class="ri-group-line"></i>共同编辑</a
+            >
           </li>
         </ul>
       </div>

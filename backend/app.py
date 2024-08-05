@@ -1,12 +1,24 @@
+import itertools
 import os
+import shutil
+import sys
 
 import cv2
 import erniebot
 import numpy as np
 from flask import Flask, request, Response
 from flask_cors import CORS
+from langchain_community.document_loaders.word_document import Docx2txtLoader
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import UnstructuredExcelLoader
+from langchain_community.document_loaders import UnstructuredFileLoader
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from paddleocr import PaddleOCR
 
+# 把backend加入路径中
+sys.path.append("E:\\vue_flask\\RichEditor")
 from auth import *
 from backend.models import _hash_password
 from document import *
@@ -52,6 +64,24 @@ def forget():
     password = data.get('password')
     email = data.get('email')
     return forget_verify(username, password, email)
+
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    uid = request.json.get('uid')
+    images_path = './static/images/' + str(uid)
+    libs_path = './static/libs/' + str(uid)
+    datas_path = './data/docs_' + str(uid)
+    for directory in (images_path, libs_path, datas_path):
+        if os.path.exists(directory):
+            shutil.rmtree(directory)
+    return jsonify({"message": "用户登出成功，相关文件夹已删除"}), 200
+
+
+@app.route('/api/hotmap', methods=['GET'])
+def hotmap():
+    uid = request.args.get('uid')
+    return get_hotmap(uid)
 
 
 @app.route('/api/setvip', methods=['POST'])
@@ -116,6 +146,20 @@ def get_doc_content():
     return get_one_content(did)
 
 
+@app.route("/api/share", methods=['POST'])
+def set_share():
+    data = request.json
+    did = data.get('did')
+    flag = data.get('flag')
+    return changeShare(did, flag)
+
+
+@app.route("/api/getshare", methods=['GET'])
+def get_share():
+    shareId = request.args.get('shareId')
+    return getShare(shareId)
+
+
 @app.route('/api/documents/export', methods=['POST'])
 def export_template():
     data = request.json
@@ -160,7 +204,10 @@ def bubble_chat():
         f"请你帮忙润色这段话'{content}'，使其更有逻辑，同时依据'{prompt_text}'的条件。",
         f"请你根据这段话的大概含义进行续写'{content}'，依据'{prompt_text}'的条件。",
         f"请你帮忙对这段话进行翻译'{content}'，要注意精准度，依据'{prompt_text}'的条件。",
-        f"根据'{prompt_text}'的条件，请把这段HTML内容：'{content}'进行自动格式排版，优化结构，你需要紧紧贴合给你提供的内容或者依靠条件，返回markdown格式文本，如果有可能的的话我希望你能自动整理我的主题大意，从而返回更符合我需求的内容。",
+        f"根据'{prompt_text}'的条件，请把相关文本内容：'{content}'进行自动格式排版，优化结构，你需要紧紧贴合给你提供的内容或者依靠条件。我不需要代码块包裹你的答案，我只需要你正常回答我。如果有可能的的话我希望你能自动整理我的主题大意，从而返回更符合我需求的内容。仅仅返回结果即可",
+        f"根据'{prompt_text}'的条件，我需要你为我生成markdown格式的表格，请仅仅返回结果，不需要代码块包裹答案，可根据情况自动帮我填充数据。",
+        f"根据'{prompt_text}'的条件，以及相关文本内容：'{content}'，我需要你为我生成对应的mermaid语法的代码，请只返回结果，需要代码块包裹答案。",
+        f"根据'{prompt_text}'的条件，以及相关文本内容：'{content}'，我需要你先进行数据的提取和分析，我只需要你给我符合Markmap.js语法的结果，请只返回结果，需要代码块包裹答案。",
     ]
     print(prompts[index])
     response = erniebot.ChatCompletion.create(
@@ -171,13 +218,67 @@ def bubble_chat():
     return Response(generate_stream(response), content_type='text/event-stream')
 
 
+@app.route('/api/postlib', methods=['POST'])
+def postlib():
+    uid = request.form.get('uid')  # 获取表单数据中的 ID
+    files = request.files.getlist('files')
+
+    file_path = 'static/libs/' + str(uid) + '/'
+    if not os.path.exists(file_path):
+        os.makedirs(file_path)
+    else:
+        shutil.rmtree(file_path)
+        os.makedirs(file_path)
+    split_docs = []
+    for file in files:
+        filename = file.filename
+        if filename.split('.')[-1] in ['txt', 'pdf', 'xlsx', 'xls', 'docx', 'doc']:
+            save_path = os.path.join(file_path, file.filename)
+            file.save(save_path)
+            if filename.split('.')[-1] in ['xlsx', 'xls']:
+                loader = UnstructuredExcelLoader(os.path.join(file_path + filename))
+            if filename.split('.')[-1] in ['pdf']:
+                loader = PyPDFLoader(os.path.join(file_path + filename))
+            if filename.split('.')[-1] in ['txt']:
+                loader = UnstructuredFileLoader(os.path.join(file_path + filename))
+            if filename.split('.')[-1] in ['docx', 'doc']:
+                loader = Docx2txtLoader(os.path.join(file_path + filename))
+            try:
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=0)
+                data = loader.load()
+                print(data)
+                split_docs.append(text_splitter.split_documents(data))
+            except Exception as e:
+                print(e)
+    split_docs = list(itertools.chain(*split_docs))
+    print(split_docs)  # 将列表元素用空格连接成字符串
+    # print("split_docs size:", len(split_docs), type(split_docs))
+    # 初始化 hugginFace 的 embeddings 对象
+    embeddings = HuggingFaceEmbeddings(model_name="./models/Embeddings/text2vec-base-chinese")
+    print("embeddings", embeddings)
+    print("embeddings model_name", embeddings.model_name)
+    # 初始化加载器，并将向量保存到磁盘
+    lib = Chroma.from_documents(split_docs, embeddings, persist_directory="./data/docs_" + str(uid))
+    # 持久化
+    lib.persist()
+    return jsonify({"message": "构建成功"}), 200
+
+
 @app.route('/api/chat', methods=['POST'])
 def talk_chat():
     data = request.get_json()
+    uid = data.get('uid')
     content = data.get('content')
+    embeddings = HuggingFaceEmbeddings(model_name="./models/Embeddings/text2vec-base-chinese")
+    lib = Chroma(persist_directory=f"./data/docs_{uid}", embedding_function=embeddings)
+    info = ""
+    similarDocs = lib.similarity_search(content, k=4)
+    for similardoc in similarDocs:
+        info = info + similardoc.page_content
+    m = "结合以下信息：" + info + "。回答这个问题：" + content
     response = erniebot.ChatCompletion.create(
         model='ernie-bot',
-        messages=[{'role': 'user', 'content': content}],
+        messages=[{'role': 'user', 'content': m}],
         stream=True,
     )
     return Response(generate_stream(response), content_type='text/event-stream')

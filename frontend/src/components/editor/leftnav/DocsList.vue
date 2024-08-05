@@ -24,6 +24,7 @@ const {
   showTemplates,
   templatesList,
   applyTemplate,
+  applyShare
 } = useDocument();
 
 const count = ref(0);
@@ -139,7 +140,9 @@ watch(filterDocList, (newDocList) => {
 });
 
 const createShow = ref(false);
+const shareShow = ref(false)
 const createTitle = ref("");
+const shareTitle = ref("");
 const createTag = ref("");
 
 const templateShow = ref(false);
@@ -148,6 +151,10 @@ const templateTag = ref("");
 
 function createOneDoc() {
   createShow.value = true;
+}
+
+function createShareDoc() {
+  shareShow.value = true;
 }
 
 function createConfirm() {
@@ -173,6 +180,19 @@ function createConfirm() {
       is_shared: false,
     };
     createDocument(uid, doc);
+  }
+}
+
+function shareConfirm() {
+  const share_id = shareTitle.value;
+  if (share_id === "" || share_id === " ") {
+    ElMessage({
+      message: "请输入共享码",
+      type: "warning",
+    });
+  } else {
+    shareShow.value = false;
+    applyShare(share_id);
   }
 }
 
@@ -236,6 +256,7 @@ function scrollToCurrentDocument(currentDid: string) {
 onMounted(() => {
   getAllDocuments();
   emitter.on("create-doc", createOneDoc);
+  emitter.on("create-share-doc", createShareDoc);
   emitter.on("apply-template", templateOneDoc);
   emitter.on("locate-current", scrollToCurrentDocumentRef);
   emitter.on("header-delete-doc", deleteDoc);
@@ -244,6 +265,7 @@ onMounted(() => {
 });
 onUnmounted(() => {
   emitter.off("create-doc", createOneDoc);
+  emitter.off("create-share-doc", createShareDoc);
   emitter.off("apply-template", templateOneDoc);
   emitter.off("locate-current", scrollToCurrentDocumentRef);
   emitter.off("header-delete-doc", deleteDoc);
@@ -266,6 +288,20 @@ onUnmounted(() => {
       <div class="dialog-footer">
         <el-button @click="createShow = false">取消</el-button>
         <el-button type="primary" @click="createConfirm"> 确认</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="shareShow" title="使用共享文档" width="300">
+    <el-form :model="true">
+      <el-form-item label="共享标题码">
+        <el-input v-model="shareTitle" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="shareShow = false">取消</el-button>
+        <el-button type="primary" @click="shareConfirm"> 确认</el-button>
       </div>
     </template>
   </el-dialog>

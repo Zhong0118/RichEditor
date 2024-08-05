@@ -37,6 +37,47 @@ export function useDocument() {
   const create_did = ref("");
   const owner_id = userStore.user?.uid;
 
+  async function applyShare(share_id) {
+    try {
+      const response = await http.request({
+        method: "GET",
+        url: `/api/getshare?shareId=${encodeURIComponent(share_id)}`,
+      });
+      if (response.status === 200) {
+        await Swal.fire({
+          text: "获取成功",
+          icon: "success",
+          toast: true,
+          position: "top",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+        const newDocument = response.data.doc;
+        documentsList.value.unshift(newDocument); // 将新文档添加到列表开头
+        documentStore.setDocument(newDocument); // 更新 documentStore
+      } else {
+        await Swal.fire({
+          text: response.data.message,
+          icon: "error",
+          toast: true,
+          position: "top",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      }
+    } catch (error) {
+      await Swal.fire({
+        title: "获取失败",
+        text: error.message,
+        position: "top",
+        icon: "error",
+        toast: true,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+    }
+  }
+
   async function createDocument(owner_id, doc) {
     try {
       const response = await http.request({
@@ -380,5 +421,6 @@ export function useDocument() {
     showTemplates,
     applyTemplate,
     templatesList,
+    applyShare,
   };
 }

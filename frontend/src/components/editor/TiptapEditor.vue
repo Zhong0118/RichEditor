@@ -3,7 +3,7 @@ import ButtonGroup from "primevue/buttongroup";
 import { marked } from "marked";
 import Button from "primevue/button";
 import { useUserStore } from "@/store/user.js";
-import { ElMessage, ElMessageBox, UploadFile } from "element-plus";
+import { ElLoading, ElMessage, ElMessageBox, UploadFile } from "element-plus";
 import {
   BubbleMenu,
   EditorContent,
@@ -61,6 +61,8 @@ import { useDocumentStore } from "@/store/document.ts";
 import emitter from "@/hooks/mitter.js";
 import { useDocument } from "@/hooks/useDocument.js";
 import http from "@/utils/requests.ts";
+import Swal from "sweetalert2";
+import { Document } from "@types/DocumentType.js";
 
 const documentStore = useDocumentStore();
 const userStore = useUserStore();
@@ -157,6 +159,7 @@ const selectBubble = ref(false);
 const selectOption = ref(-1);
 const promptText = ref("");
 const ocrDialog = ref();
+const libDialog = ref(false);
 const voiceDialog = ref();
 const dialogImageUrl = ref("");
 const dialogVisible = ref(false);
@@ -165,6 +168,113 @@ const fileList = ref<UploadFile[]>([]);
 const upload_btn = ref(false);
 const boxdisplay = ref(true);
 const ocrText = ref("");
+
+const isValidFileType = (filename: String) => {
+  const validTypes = ["txt", "pdf", "csv", "xlsx", "xls", "docx", "doc"];
+  const fileType = filename.split(".").pop()?.toLowerCase();
+  return validTypes.includes(fileType);
+};
+const libList = ref<UploadFile[]>([]);
+
+const handleFileChange = (file: UploadFile, fileList: UploadFile[]) => {
+  if (isValidFileType(file.name)) {
+    libList.value = fileList;
+  } else {
+    Swal.fire({
+      text: "不支持的文件类型",
+      icon: "warning",
+      timer: 2000,
+      timerProgressBar: true,
+    });
+  }
+};
+
+const libUpload = () => {
+  libDialog.value = true;
+};
+
+const libBeforeRemove = (file: UploadFile, libList: UploadFile[]) => {
+  return new Promise((resolve, reject) => {
+    ElMessageBox.confirm("此操作将删除该文件, 是否继续?", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    })
+      .then(() => {
+        resolve(true);
+      })
+      .catch(() => {
+        reject(false);
+      });
+  });
+};
+
+// 删除文件时的逻辑
+const libHandleRemove = (file: UploadFile, fileList: UploadFile[]) => {
+  const index = libList.value.findIndex((f) => f.uid === file.uid);
+  if (index !== -1) {
+    libList.value.splice(index, 1);
+  }
+};
+
+const libHandleSuccess = (file: UploadFile, libList: UploadFile[]) => {
+  ElMessage({ message: "文件上传成功", type: "success" });
+};
+
+const loading = ref(false);
+
+const doLib = async () => {
+  if (!libList.value.length) {
+    await Swal.fire({
+      text: "请选择文件",
+      icon: "info",
+      toast: true,
+      position: "top",
+      timer: 2000,
+      timerProgressBar: true,
+    });
+    return;
+  } // 如果没有文件，不执行上传
+  const loadingInstance = ElLoading.service({
+    lock: true,
+    text: "上传中，请稍候...",
+    background: "rgba(0, 0, 0, 0.7)",
+  });
+  loading.value = true;
+  let formData = new FormData();
+  formData.append("uid", userStore.user?.uid!);
+  libList.value.map((file) => {
+    formData.append("files", file.raw!);
+  });
+  const response = await fetch("http://localhost:5000/api/postlib", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (response.status === 200) {
+    await Swal.fire({
+      text: "上传成功",
+      icon: "success",
+      toast: true,
+      position: "top",
+      timer: 2000,
+      timerProgressBar: true,
+    });
+    loading.value = false;
+    loadingInstance.close();
+  } else {
+    await Swal.fire({
+      text: "上传失败",
+      icon: "error",
+      toast: true,
+      position: "top",
+      timer: 2000,
+      timerProgressBar: true,
+    });
+    loading.value = false;
+    loadingInstance.close();
+  }
+};
 
 const handleRemove = (file: UploadFile) => {
   const index = fileList.value.findIndex((f) => f.uid === file.uid);
@@ -208,6 +318,12 @@ const handleChanges = (file: UploadFile, files: UploadFile[]) => {
 
 const doOCR = async () => {
   boxdisplay.value = false;
+  const loadingInstance = ElLoading.service({
+    lock: true,
+    text: "上传中，请稍候...",
+    background: "rgba(0, 0, 0, 0.7)",
+  });
+  loading.value = true;
   let formData = new FormData();
   formData.append("uid", userStore.user?.uid!);
   fileList.value.forEach((file) => {
@@ -218,6 +334,8 @@ const doOCR = async () => {
     body: formData,
   });
   const reader = response.body!.getReader();
+  loading.value = false;
+  loadingInstance.close();
   while (true) {
     const { done, value } = await reader.read();
     const chunk = new TextDecoder().decode(value);
@@ -233,12 +351,24 @@ const bubbleTextResult = ref();
 // 调用ai部分功能
 const callAi = async (e: any) => {
   let text: string | undefined = "";
-  if (e !== 4) {
+  if (e === 4 || e === 6 || e === 7) {
+    text = editor.value?.getHTML();
+  } else {
     const { state } = editor.value!;
     const { from, to } = state.selection;
     text = state.doc.textBetween(from, to, " ");
-  } else {
-    text = editor.value?.getHTML();
+  }
+  if (e === 6 || e === 7) {
+    if (text == "") {
+      await Swal.fire({
+        text: "请填入您的需求",
+        icon: "error",
+        toast: true,
+        position: "top",
+        timer: 2000,
+        timerProgressBar: true,
+      });
+    }
   }
   const response = await fetch("http://localhost:5000/api/bubblechat", {
     method: "POST",
@@ -251,13 +381,15 @@ const callAi = async (e: any) => {
       promptText: promptText.value,
     }),
   });
+  const aiBP = document.createElement("p");
+  bubbleTextResult.value.appendChild(aiBP);
   const reader = response.body!.getReader();
   let returnText = "";
   while (true) {
     const { done, value } = await reader.read();
     const chunk = new TextDecoder().decode(value);
     returnText += chunk;
-    bubbleTextResult.value.innerHTML = marked.parse(returnText);
+    aiBP.innerHTML = <string>marked.parse(returnText);
     if (done) {
       break;
     }
@@ -300,6 +432,43 @@ const structureSort = () => {
   selectOption.value = 4;
 };
 
+const tableRecognise = () => {
+  selectBubble.value = true;
+  selectOption.value = 5;
+};
+
+const umlRecognise = () => {
+  Swal.fire({
+    text: "请事先输入您的UML类型和UML需求",
+    icon: "info",
+    showConfirmButton: true,
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    showCancelButton: true,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      selectBubble.value = true;
+      selectOption.value = 6;
+    }
+  });
+};
+
+const mindRecognise = () => {
+  Swal.fire({
+    text: "请尽量以多重无序列表的格式作为您的思维导图基础内容",
+    icon: "info",
+    showConfirmButton: true,
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    showCancelButton: true,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      selectBubble.value = true;
+      selectOption.value = 7;
+    }
+  });
+};
+
 const aiTalking = () => {
   openAItalk.value = true;
 };
@@ -328,7 +497,7 @@ function voiceCancel() {
   }
 
   if (stream!) {
-    stream.getTracks().forEach(track => track.stop()); // 停止媒体流
+    stream.getTracks().forEach((track) => track.stop()); // 停止媒体流
     stream = null;
   }
 }
@@ -361,7 +530,7 @@ const endVoice = () => {
     isRecording.value = false;
     uploadAudio.value = true;
 
-    stream!.getTracks().forEach(track => track.stop()); // 停止媒体流
+    stream!.getTracks().forEach((track) => track.stop()); // 停止媒体流
     stream = null;
   };
   mediaRecorder!.stop(); // 使用全局变量mediaRecorder
@@ -410,25 +579,25 @@ const exportPdf = async () => {
   printWindow.print();
 };
 
-const openAItalk = ref(false)
+const openAItalk = ref(false);
 const sendAiQuestion = ref("");
 const chatAnswer = ref("");
 const aiTalkDialog = ref();
 
-function cancelAiMessage(){
+function cancelAiMessage() {
   sendAiQuestion.value = "";
   openAItalk.value = false;
 }
 
 const sendAiMessage = async () => {
-  const userMessageDiv = document.createElement('div');
+  const userMessageDiv = document.createElement("div");
   userMessageDiv.className = "flex flex-row px-4 py-8 sm:px-6";
-  const userImg = document.createElement('img');
+  const userImg = document.createElement("img");
   userImg.className = "mr-2 flex h-8 w-8 rounded-full sm:mr-4";
   userImg.src = "src/assets/icons/talkuser.svg";
-  const userText = document.createElement('div');
+  const userText = document.createElement("div");
   userText.className = "flex max-w-3xl items-center";
-  const userP = document.createElement('p');
+  const userP = document.createElement("p");
   userP.className = "opposans";
   let text: string | undefined = sendAiQuestion.value;
   userP.textContent = text;
@@ -438,14 +607,16 @@ const sendAiMessage = async () => {
   aiTalkDialog.value.appendChild(userMessageDiv);
   sendAiQuestion.value = "";
 
-  const aiMessageDiv = document.createElement('div');
-  aiMessageDiv.className = "flex bg-slate-100 px-4 py-8 dark:bg-slate-900 sm:px-6";
-  const aiImg = document.createElement('img');
+  const aiMessageDiv = document.createElement("div");
+  aiMessageDiv.className =
+    "flex bg-slate-100 px-4 py-8 dark:bg-slate-900 sm:px-6";
+  const aiImg = document.createElement("img");
   aiImg.className = "mr-2 flex h-8 w-8 rounded-full sm:mr-4";
   aiImg.src = "src/assets/icons/talkai.svg";
-  const aiText = document.createElement('div');
-  aiText.className = "flex w-full flex-col items-start lg:flex-row lg:justify-between";
-  const aiP = document.createElement('p');
+  const aiText = document.createElement("div");
+  aiText.className =
+    "flex w-full flex-col items-start lg:flex-row lg:justify-between";
+  const aiP = document.createElement("p");
   aiP.className = "max-w-3xl opposans";
   aiText.appendChild(aiP);
   aiMessageDiv.appendChild(aiImg);
@@ -459,6 +630,7 @@ const sendAiMessage = async () => {
     },
     body: JSON.stringify({
       content: text,
+      uid: userStore.user?.uid,
     }),
   });
   const reader = response.body!.getReader();
@@ -473,9 +645,7 @@ const sendAiMessage = async () => {
     }
   }
   reader.releaseLock();
-
 };
-
 
 const updateContent = async () => {
   editor.value!.commands.setContent(
@@ -486,63 +656,80 @@ const updateContent = async () => {
   loadHeadings();
 };
 
+const showLoading = () => {
+  ElLoading.service({
+    lock: true,
+    text: "导出中，请稍候...",
+    background: "rgba(0, 0, 0, 0.7)",
+  });
+};
+
 onMounted(() => {
   emitter.on("change-content", updateContent);
+  emitter.on("refresh", updateContent);
   emitter.on("structure-sort", structureSort);
   emitter.on("ai-talking", aiTalking);
   emitter.on("ocr-recognise", ocrRecognise);
+  emitter.on("lib-upload", libUpload);
   emitter.on("voice-recognise", voiceRecognise);
+  emitter.on("uml-recognise", umlRecognise);
+  emitter.on("mind-recognise", mindRecognise);
+  emitter.on("table-recognise", tableRecognise);
   emitter.on("export-pdf", exportPdf);
 });
 
 onUnmounted(() => {
   editor.value!.destroy();
   emitter.off("change-content", updateContent);
+  emitter.off("refresh", updateContent);
   emitter.off("structure-sort", structureSort);
   emitter.off("ai-talking", aiTalking);
   emitter.off("ocr-recognise", ocrRecognise);
+  emitter.off("lib-upload", libUpload);
   emitter.off("voice-recognise", voiceRecognise);
+  emitter.off("uml-recognise", umlRecognise);
+  emitter.off("mind-recognise", mindRecognise);
+  emitter.off("table-recognise", tableRecognise);
   emitter.off("export-pdf", exportPdf);
 });
 </script>
 <template>
-  <div v-show="openAItalk" class="fixed flex h-[80%] w-[70%] flex-col z-[999]">
-  <div
-    ref="aiTalkDialog"
-    class="flex-1 overflow-y-auto bg-slate-300 text-sm leading-6 text-slate-900 shadow-md dark:bg-slate-800 dark:text-slate-300 sm:text-base sm:leading-7"
-  >
-  </div>
-  <!-- Prompt message input -->
-  <div
-    class="flex w-full items-center rounded-b-md border-t border-slate-300 bg-slate-200 p-2 dark:border-slate-700 dark:bg-slate-900"
-  >
-    <label for="chat" class="sr-only">输入</label>
-    <textarea
-      id="chat-input"
-      rows="3"
-      class="mx-2 flex min-h-full w-full rounded-md border border-slate-300 bg-slate-50 p-2 text-base text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
-      placeholder="输入文本"
-      v-model="sendAiQuestion"
-    ></textarea>
-    <div>
-      <button
-        class="inline-flex hover:text-blue-600 dark:text-slate-200 dark:hover:text-blue-600 sm:p-2"
-        @click="sendAiMessage"
-      >
-        <i class="ri-send-plane-line"></i>
-        <span class="sr-only">Send message</span>
-      </button>
+  <div v-show="openAItalk" class="fixed z-[999] flex h-[80%] w-[70%] flex-col">
+    <div
+      ref="aiTalkDialog"
+      class="flex-1 overflow-y-auto bg-slate-300 text-sm leading-6 text-slate-900 shadow-md sm:text-base sm:leading-7 dark:bg-slate-800 dark:text-slate-300"
+    ></div>
+    <!-- Prompt message input -->
+    <div
+      class="flex w-full items-center rounded-b-md border-t border-slate-300 bg-slate-200 p-2 dark:border-slate-700 dark:bg-slate-900"
+    >
+      <label class="sr-only" for="chat">输入</label>
+      <textarea
+        id="chat-input"
+        v-model="sendAiQuestion"
+        class="mx-2 flex min-h-full w-full rounded-md border border-slate-300 bg-slate-50 p-2 text-base text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
+        placeholder="输入文本"
+        rows="3"
+      ></textarea>
+      <div>
+        <button
+          class="inline-flex hover:text-blue-600 sm:p-2 dark:text-slate-200 dark:hover:text-blue-600"
+          @click="sendAiMessage"
+        >
+          <i class="ri-send-plane-line"></i>
+          <span class="sr-only">Send message</span>
+        </button>
+      </div>
+      <div>
+        <button
+          class="inline-flex hover:text-blue-300 sm:p-2 dark:text-slate-200 dark:hover:text-blue-600"
+          @click="cancelAiMessage"
+        >
+          <i class="ri-close-circle-line"></i>
+        </button>
+      </div>
     </div>
-    <div>
-      <button
-        class="inline-flex hover:text-blue-300 dark:text-slate-200 dark:hover:text-blue-600 sm:p-2"
-        @click="cancelAiMessage"
-      >
-        <i class="ri-close-circle-line"></i>
-      </button>
-    </div>
   </div>
-</div>
 
   <dialog ref="voiceDialog" class="model">
     <div class="modal-box">
@@ -583,6 +770,43 @@ onUnmounted(() => {
       </form>
     </div>
   </dialog>
+
+  <div
+    v-show="libDialog"
+    class="fixed left-1/2 top-1/4 h-[450px] w-[600px] -translate-x-1/2 rounded-[8px] bg-[--panel-color]"
+  >
+    <div class="flex flex-row justify-between p-2">
+      <h3 class="alidongfang text-[24px] font-bold">本地知识库上传</h3>
+      <button
+        class="btn btn-circle btn-ghost btn-sm"
+        @click="libDialog = false"
+      >
+        <i class="ri-close-line text-[24px]"></i>
+      </button>
+    </div>
+    <el-upload
+      :auto-upload="false"
+      :before-remove="libBeforeRemove"
+      :file-list="libList"
+      :on-change="handleFileChange"
+      :on-progress="showLoading"
+      :on-remove="libHandleRemove"
+      :on-success="libHandleSuccess"
+      accept=".xls,.xlsx,.pdf,.doc,.docx,.txt"
+      action="#"
+      multiple
+    >
+      <template #trigger>
+        <button class="opposans btn btn-secondary btn-sm m-2">
+          <i class="ri-add-box-line"></i>添加
+        </button>
+      </template>
+      <button class="opposans btn btn-primary btn-sm m-2" @click="doLib">
+        <i class="ri-upload-line"></i>上传
+      </button>
+    </el-upload>
+  </div>
+
   <dialog ref="ocrDialog" class="modal">
     <div class="modal-box h-[500px]">
       <form method="dialog">
@@ -599,7 +823,9 @@ onUnmounted(() => {
         :before-remove="beforeRemove"
         :file-list="fileList"
         :on-change="handleChanges"
+        :on-progress="showLoading"
         :on-success="handleSuccess"
+        accept="image/*"
         action="#"
         limit="1"
         list-type="picture-card"
@@ -654,7 +880,7 @@ onUnmounted(() => {
         </button>
       </form>
       <h3 class="alidongfang text-lg font-bold">AI回答</h3>
-      <span ref="bubbleTextResult" class="opposans py-4"></span>
+      <div ref="bubbleTextResult" class="opposans py-4"></div>
       <form class="top-2 flex justify-end">
         <button class="opposans btn" @click.prevent="clipResult">
           <i class="ri-clipboard-line"></i>复制

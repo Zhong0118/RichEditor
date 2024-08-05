@@ -82,7 +82,7 @@ function selectDocument() {
     tag_color: props.doc.tag_color,
   };
   documentStore.setDocument(d);
-    emitter.emit("change-content");
+  emitter.emit("change-content");
 }
 
 function splitTime(time: string) {
