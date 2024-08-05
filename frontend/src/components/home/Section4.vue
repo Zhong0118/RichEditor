@@ -34,7 +34,26 @@ const card_list = reactive({
   card8: {
     img: "/src/assets/images/pic9.jpg",
     t1: "多功能模板",
+  },
 
+  card9: {
+    img: "/src/assets/images/pic14.jpg",
+    t1: "共享合作",
+  },
+
+  card10: {
+    img: "/src/assets/images/pic15.jpg",
+    t1: "智能UML",
+  },
+
+  card11: {
+    img: "/src/assets/images/pic16.jpg",
+    t1: "思维提炼",
+  },
+
+  card12: {
+    img: "/src/assets/images/pic17.jpg",
+    t1: "热力展示",
   },
 });
 </script>
@@ -43,7 +62,7 @@ const card_list = reactive({
   <div id="efficiency" class="h-full bg-slate-50 pb-8 pl-[5%] pr-[5%] pt-8">
     <Description>
       <template #title1>效率提升</template>
-      <template #title2>8大效率工具，让高效成为习惯</template>
+      <template #title2>12大效率工具，让高效成为习惯</template>
       <template #title3>内嵌多种先进效率工具，多渠道内容一键收藏，创作效率指数提升</template>
     </Description>
       <div class="mt-2 grid grid-cols-2 grid-rows-4 gap-[20px]">
