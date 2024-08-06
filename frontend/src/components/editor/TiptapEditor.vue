@@ -60,9 +60,7 @@ import OutlineList from "@/components/editor/editorbody/OutlineList.vue";
 import { useDocumentStore } from "@/store/document.ts";
 import emitter from "@/hooks/mitter.js";
 import { useDocument } from "@/hooks/useDocument.js";
-import http from "@/utils/requests.ts";
 import Swal from "sweetalert2";
-import { Document } from "@types/DocumentType.js";
 
 const documentStore = useDocumentStore();
 const userStore = useUserStore();
